@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.28)
-project(creatora-obs-companion VERSION 0.1.2 LANGUAGES CXX)
+# CI injects the version from the pushed vMAJOR.MINOR.PATCH tag.
+# Branch and PR builds use the non-release version 0.0.0.
+set(CREATORA_BUILD_VERSION "0.0.0" CACHE STRING "Tag-derived Creatora plugin version")
+if(NOT CREATORA_BUILD_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+  message(FATAL_ERROR "CREATORA_BUILD_VERSION must be MAJOR.MINOR.PATCH")
+endif()
+project(creatora-obs-companion VERSION ${CREATORA_BUILD_VERSION} LANGUAGES CXX)
 set(CREATORA_GITHUB_REPOSITORY "Akurosia/creatora-obs-companion" CACHE STRING "owner/repo hosting public GitHub Releases")
 
 set(CMAKE_CXX_STANDARD 17)
