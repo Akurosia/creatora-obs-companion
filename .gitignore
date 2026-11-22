@@ -1,0 +1,6 @@
+/build/
+/build-obs33/
+/dist/
+*.zip
+!docs/*.zip
+.vs/

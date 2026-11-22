@@ -1,0 +1,59 @@
+name: Build and release OBS Companion
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    # Requires a private, trusted machine with OBS 33 development build and Qt 6.11.1.
+    # Do not run untrusted pull requests on this runner.
+    runs-on: [self-hosted, Windows, X64, obs33]
+    permissions:
+      contents: write
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release version
+        shell: pwsh
+        run: |
+          $cmakeVersion = (Select-String -Path CMakeLists.txt -Pattern 'project\(creatora-obs-companion VERSION (\d+\.\d+\.\d+)' ).Matches.Groups[1].Value
+          if (-not $cmakeVersion) { throw 'Could not read CMake project version' }
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') { throw 'Release tags must be vMAJOR.MINOR.PATCH' }
+          "PLUGIN_VERSION=$cmakeVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$cmakeVersion") { throw "Tag $env:GITHUB_REF_NAME does not match CMake version v$cmakeVersion" }
+      - name: Build against OBS 33 SDK
+        shell: pwsh
+        env:
+          OBS_SOURCE_ROOT: ${{ vars.OBS_SOURCE_ROOT }}
+          QT_ROOT: ${{ vars.QT_ROOT }}
+        run: |
+          if (-not $env:OBS_SOURCE_ROOT -or -not $env:QT_ROOT) { throw 'Configure repository variables OBS_SOURCE_ROOT and QT_ROOT on the self-hosted runner' }
+          ./scripts/build-obs33.ps1 -ObsRoot $env:OBS_SOURCE_ROOT -QtRoot $env:QT_ROOT -GitHubRepository '${{ github.repository }}' -Clean
+      - name: Package versioned release
+        shell: pwsh
+        env:
+          OBS_QT_CORE_DLL: ${{ vars.OBS_QT_CORE_DLL }}
+          QT_ROOT: ${{ vars.QT_ROOT }}
+        run: |
+          ./scripts/package-release.ps1 -QtRoot $env:QT_ROOT -Version $env:PLUGIN_VERSION -ObsQtCoreDll $env:OBS_QT_CORE_DLL
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: creatora-obs-companion-windows-x64
+          path: dist/*
+          if-no-files-found: error
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = @(Get-ChildItem -LiteralPath dist -File | Select-Object -ExpandProperty FullName)
+          if ($assets.Count -ne 2) { throw "Expected ZIP and SHA256 assets, got $($assets.Count)" }
+          gh release create "$env:GITHUB_REF_NAME" @assets --verify-tag --generate-notes --title "Creatora OBS Companion $env:GITHUB_REF_NAME"
+          if ($LASTEXITCODE -ne 0) { throw "GitHub Release creation failed ($LASTEXITCODE)" }

@@ -125,7 +125,7 @@ events:
       The output was:
       0
       MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-      Der Buildvorgang wurde am 14.11.2026 23:24:57 gestartet.
+      Der Buildvorgang wurde am 22.11.2026 14:38:43 gestartet.
       
       Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\4.4.4\\CompilerIdCXX\\CompilerIdCXX.vcxproj" auf Knoten "1" (Standardziele).
       PrepareForBuild:
@@ -154,7 +154,7 @@ events:
           0 Warnung(en)
           0 Fehler
       
-      Verstrichene Zeit 00:00:00.64
+      Verstrichene Zeit 00:00:00.95
       
       
       Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
@@ -1844,8 +1844,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y"
-      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y"
+      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh"
+      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -1857,39 +1857,39 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: false
       stdout: |
-        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y'
+        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a93f0.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_58320.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-        Der Buildvorgang wurde am 14.11.2026 23:24:58 gestartet.
+        Der Buildvorgang wurde am 22.11.2026 14:38:44 gestartet.
         
-        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\cmTC_a93f0.vcxproj" auf Knoten "1" (Standardziele).
+        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\cmTC_58320.vcxproj" auf Knoten "1" (Standardziele).
         PrepareForBuild:
           Die strukturierte Ausgabe ist aktiviert. Die Formatierung der Compilerdiagnose spiegelt die Fehlerhierarchie wider. Weitere Informationen finden Sie unter https://aka.ms/cpp/structured-output.
-          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\Debug\\" wird erstellt.
-          Das Verzeichnis "cmTC_a93f0.dir\\Debug\\cmTC_a93f0.tlog\\" wird erstellt.
+          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_58320.dir\\Debug\\cmTC_58320.tlog\\" wird erstellt.
         InitializeBuildStatus:
-          "cmTC_a93f0.dir\\Debug\\cmTC_a93f0.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
-          Aktualisieren des Timestamps von "cmTC_a93f0.dir\\Debug\\cmTC_a93f0.tlog\\unsuccessfulbuild".
+          "cmTC_58320.dir\\Debug\\cmTC_58320.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_58320.dir\\Debug\\cmTC_58320.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_a93f0.dir\\Debug\\\\" /Fd"cmTC_a93f0.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.4\\Modules\\CMakeCXXCompilerABI.cpp"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_58320.dir\\Debug\\\\" /Fd"cmTC_58320.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.4\\Modules\\CMakeCXXCompilerABI.cpp"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64
           Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_a93f0.dir\\Debug\\\\" /Fd"cmTC_a93f0.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.4\\Modules\\CMakeCXXCompilerABI.cpp"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /Fo"cmTC_58320.dir\\Debug\\\\" /Fd"cmTC_58320.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\Program Files\\CMake\\share\\cmake-4.4\\Modules\\CMakeCXXCompilerABI.cpp"
           CMakeCXXCompilerABI.cpp
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\Debug\\cmTC_a93f0.exe" /INCREMENTAL /ILK:"cmTC_a93f0.dir\\Debug\\cmTC_a93f0.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y/Debug/cmTC_a93f0.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y/Debug/cmTC_a93f0.lib" /MACHINE:X64  /machine:x64 cmTC_a93f0.dir\\Debug\\CMakeCXXCompilerABI.obj
-          cmTC_a93f0.vcxproj -> C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\Debug\\cmTC_a93f0.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\Debug\\cmTC_58320.exe" /INCREMENTAL /ILK:"cmTC_58320.dir\\Debug\\cmTC_58320.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh/Debug/cmTC_58320.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh/Debug/cmTC_58320.lib" /MACHINE:X64  /machine:x64 cmTC_58320.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_58320.vcxproj -> C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\Debug\\cmTC_58320.exe
         FinalizeBuildStatus:
-          Die Datei "cmTC_a93f0.dir\\Debug\\cmTC_a93f0.tlog\\unsuccessfulbuild" wird gel├Âscht.
-          Aktualisieren des Timestamps von "cmTC_a93f0.dir\\Debug\\cmTC_a93f0.tlog\\cmTC_a93f0.lastbuildstate".
-        Die Erstellung von Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\cmTC_a93f0.vcxproj" ist abgeschlossen (Standardziele).
+          Die Datei "cmTC_58320.dir\\Debug\\cmTC_58320.tlog\\unsuccessfulbuild" wird gel├Âscht.
+          Aktualisieren des Timestamps von "cmTC_58320.dir\\Debug\\cmTC_58320.tlog\\cmTC_58320.lastbuildstate".
+        Die Erstellung von Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\cmTC_58320.vcxproj" ist abgeschlossen (Standardziele).
         
         Der Buildvorgang wurde erfolgreich ausgef├╝hrt.
             0 Warnung(en)
             0 Fehler
         
-        Verstrichene Zeit 00:00:00.66
+        Verstrichene Zeit 00:00:00.55
         
       exitCode: 0
   -
@@ -1902,7 +1902,7 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|"|[0-9]+>[ 	-]*Build:[ 	0-9]+ ms[ 	]*)?[ 	]*(([^"]*[/\\])?(ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
-        link line: [  C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-3jdx5y\\Debug\\cmTC_a93f0.exe" /INCREMENTAL /ILK:"cmTC_a93f0.dir\\Debug\\cmTC_a93f0.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y/Debug/cmTC_a93f0.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-3jdx5y/Debug/cmTC_a93f0.lib" /MACHINE:X64  /machine:x64 cmTC_a93f0.dir\\Debug\\CMakeCXXCompilerABI.obj] ==> linker [C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe]
+        link line: [  C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-wg7ekh\\Debug\\cmTC_58320.exe" /INCREMENTAL /ILK:"cmTC_58320.dir\\Debug\\cmTC_58320.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh/Debug/cmTC_58320.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-wg7ekh/Debug/cmTC_58320.lib" /MACHINE:X64  /machine:x64 cmTC_58320.dir\\Debug\\CMakeCXXCompilerABI.obj] ==> linker [C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe]
         linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/18/Community/VC/Tools/MSVC/14.51.36231/bin/HostX64/x64/link.exe 
         implicit libs: []
         implicit objs: []
@@ -1929,7 +1929,7 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:93 (find_package)"
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:125 (__find_dependency_common)"
       - "C:/OBS-Development/obs-studio/build_x64/libobs/libobsConfig.cmake:34 (find_dependency)"
-      - "CMakeLists.txt:36 (find_package)"
+      - "CMakeLists.txt:37 (find_package)"
     mode: "program"
     variable: "PKG_CONFIG_EXECUTABLE"
     description: "pkg-config executable"
@@ -2879,10 +2879,10 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:93 (find_package)"
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:125 (__find_dependency_common)"
       - "C:/OBS-Development/obs-studio/build_x64/libobs/libobsConfig.cmake:35 (find_dependency)"
-      - "CMakeLists.txt:36 (find_package)"
+      - "CMakeLists.txt:37 (find_package)"
     directories:
-      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-4w9m7p"
-      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-4w9m7p"
+      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-a5pa2s"
+      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-a5pa2s"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -2893,39 +2893,39 @@ events:
       variable: "CMAKE_HAVE_LIBC_PTHREAD"
       cached: true
       stdout: |
-        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-4w9m7p'
+        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-a5pa2s'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_91410.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_90657.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-        Der Buildvorgang wurde am 14.11.2026 23:25:00 gestartet.
+        Der Buildvorgang wurde am 22.11.2026 14:38:45 gestartet.
         
-        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\cmTC_91410.vcxproj" auf Knoten "1" (Standardziele).
+        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\cmTC_90657.vcxproj" auf Knoten "1" (Standardziele).
         PrepareForBuild:
           Die strukturierte Ausgabe ist aktiviert. Die Formatierung der Compilerdiagnose spiegelt die Fehlerhierarchie wider. Weitere Informationen finden Sie unter https://aka.ms/cpp/structured-output.
-          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\Debug\\" wird erstellt.
-          Das Verzeichnis "cmTC_91410.dir\\Debug\\cmTC_91410.tlog\\" wird erstellt.
+          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_90657.dir\\Debug\\cmTC_90657.tlog\\" wird erstellt.
         InitializeBuildStatus:
-          "cmTC_91410.dir\\Debug\\cmTC_91410.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
-          Aktualisieren des Timestamps von "cmTC_91410.dir\\Debug\\cmTC_91410.tlog\\unsuccessfulbuild".
+          "cmTC_90657.dir\\Debug\\cmTC_90657.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_90657.dir\\Debug\\cmTC_90657.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_91410.dir\\Debug\\\\" /Fd"cmTC_91410.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\src.cxx"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_90657.dir\\Debug\\\\" /Fd"cmTC_90657.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\src.cxx"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64
           Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_91410.dir\\Debug\\\\" /Fd"cmTC_91410.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\src.cxx"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_90657.dir\\Debug\\\\" /Fd"cmTC_90657.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\src.cxx"
           src.cxx
-        C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\src.cxx(1,10): error C1083: Datei (Include) kann nicht ge├Âffnet werden: "pthread.h": No such file or directory [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\cmTC_91410.vcxproj]
-        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\cmTC_91410.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+        C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\src.cxx(1,10): error C1083: Datei (Include) kann nicht ge├Âffnet werden: "pthread.h": No such file or directory [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\cmTC_90657.vcxproj]
+        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\cmTC_90657.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
         
         Fehler beim Buildvorgang.
         
-        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\cmTC_91410.vcxproj" (Standardziel) (1) ->
+        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\cmTC_90657.vcxproj" (Standardziel) (1) ->
         (ClCompile Ziel) -> 
-          C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\src.cxx(1,10): error C1083: Datei (Include) kann nicht ge├Âffnet werden: "pthread.h": No such file or directory [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-4w9m7p\\cmTC_91410.vcxproj]
+          C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\src.cxx(1,10): error C1083: Datei (Include) kann nicht ge├Âffnet werden: "pthread.h": No such file or directory [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-a5pa2s\\cmTC_90657.vcxproj]
         
             0 Warnung(en)
             1 Fehler
         
-        Verstrichene Zeit 00:00:00.41
+        Verstrichene Zeit 00:00:00.38
         
       exitCode: 1
   -
@@ -2937,10 +2937,10 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:93 (find_package)"
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:125 (__find_dependency_common)"
       - "C:/OBS-Development/obs-studio/build_x64/libobs/libobsConfig.cmake:35 (find_dependency)"
-      - "CMakeLists.txt:36 (find_package)"
+      - "CMakeLists.txt:37 (find_package)"
     directories:
-      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-2li36i"
-      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-2li36i"
+      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-eqvba2"
+      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-eqvba2"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -2951,41 +2951,41 @@ events:
       variable: "CMAKE_HAVE_PTHREADS_CREATE"
       cached: true
       stdout: |
-        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-2li36i'
+        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-eqvba2'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_80bc2.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_0724d.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-        Der Buildvorgang wurde am 14.11.2026 23:25:00 gestartet.
+        Der Buildvorgang wurde am 22.11.2026 14:38:46 gestartet.
         
-        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\cmTC_80bc2.vcxproj" auf Knoten "1" (Standardziele).
+        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\cmTC_0724d.vcxproj" auf Knoten "1" (Standardziele).
         PrepareForBuild:
           Die strukturierte Ausgabe ist aktiviert. Die Formatierung der Compilerdiagnose spiegelt die Fehlerhierarchie wider. Weitere Informationen finden Sie unter https://aka.ms/cpp/structured-output.
-          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\Debug\\" wird erstellt.
-          Das Verzeichnis "cmTC_80bc2.dir\\Debug\\cmTC_80bc2.tlog\\" wird erstellt.
+          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_0724d.dir\\Debug\\cmTC_0724d.tlog\\" wird erstellt.
         InitializeBuildStatus:
-          "cmTC_80bc2.dir\\Debug\\cmTC_80bc2.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
-          Aktualisieren des Timestamps von "cmTC_80bc2.dir\\Debug\\cmTC_80bc2.tlog\\unsuccessfulbuild".
+          "cmTC_0724d.dir\\Debug\\cmTC_0724d.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_0724d.dir\\Debug\\cmTC_0724d.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_80bc2.dir\\Debug\\\\" /Fd"cmTC_80bc2.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\CheckFunctionExists.cxx"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_0724d.dir\\Debug\\\\" /Fd"cmTC_0724d.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\CheckFunctionExists.cxx"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64
           Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_80bc2.dir\\Debug\\\\" /Fd"cmTC_80bc2.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\CheckFunctionExists.cxx"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_0724d.dir\\Debug\\\\" /Fd"cmTC_0724d.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\CheckFunctionExists.cxx"
           CheckFunctionExists.cxx
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\Debug\\cmTC_80bc2.exe" /INCREMENTAL /ILK:"cmTC_80bc2.dir\\Debug\\cmTC_80bc2.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-2li36i/Debug/cmTC_80bc2.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-2li36i/Debug/cmTC_80bc2.lib" /MACHINE:X64  /machine:x64 cmTC_80bc2.dir\\Debug\\CheckFunctionExists.obj
-        LINK : fatal error LNK1104: Datei "pthreads.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\cmTC_80bc2.vcxproj]
-        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\cmTC_80bc2.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\Debug\\cmTC_0724d.exe" /INCREMENTAL /ILK:"cmTC_0724d.dir\\Debug\\cmTC_0724d.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-eqvba2/Debug/cmTC_0724d.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-eqvba2/Debug/cmTC_0724d.lib" /MACHINE:X64  /machine:x64 cmTC_0724d.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: Datei "pthreads.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\cmTC_0724d.vcxproj]
+        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\cmTC_0724d.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
         
         Fehler beim Buildvorgang.
         
-        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\cmTC_80bc2.vcxproj" (Standardziel) (1) ->
+        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\cmTC_0724d.vcxproj" (Standardziel) (1) ->
         (Link Ziel) -> 
-          LINK : fatal error LNK1104: Datei "pthreads.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-2li36i\\cmTC_80bc2.vcxproj]
+          LINK : fatal error LNK1104: Datei "pthreads.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-eqvba2\\cmTC_0724d.vcxproj]
         
             0 Warnung(en)
             1 Fehler
         
-        Verstrichene Zeit 00:00:00.57
+        Verstrichene Zeit 00:00:00.44
         
       exitCode: 1
   -
@@ -2997,10 +2997,10 @@ events:
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:93 (find_package)"
       - "C:/Program Files/CMake/share/cmake-4.4/Modules/CMakeFindDependencyMacro.cmake:125 (__find_dependency_common)"
       - "C:/OBS-Development/obs-studio/build_x64/libobs/libobsConfig.cmake:35 (find_dependency)"
-      - "CMakeLists.txt:36 (find_package)"
+      - "CMakeLists.txt:37 (find_package)"
     directories:
-      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-fy6l4t"
-      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-fy6l4t"
+      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-f6fl9y"
+      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-f6fl9y"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -3011,41 +3011,41 @@ events:
       variable: "CMAKE_HAVE_PTHREAD_CREATE"
       cached: true
       stdout: |
-        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-fy6l4t'
+        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-f6fl9y'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7db35.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_8b479.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-        Der Buildvorgang wurde am 14.11.2026 23:25:01 gestartet.
+        Der Buildvorgang wurde am 22.11.2026 14:38:47 gestartet.
         
-        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\cmTC_7db35.vcxproj" auf Knoten "1" (Standardziele).
+        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\cmTC_8b479.vcxproj" auf Knoten "1" (Standardziele).
         PrepareForBuild:
           Die strukturierte Ausgabe ist aktiviert. Die Formatierung der Compilerdiagnose spiegelt die Fehlerhierarchie wider. Weitere Informationen finden Sie unter https://aka.ms/cpp/structured-output.
-          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\Debug\\" wird erstellt.
-          Das Verzeichnis "cmTC_7db35.dir\\Debug\\cmTC_7db35.tlog\\" wird erstellt.
+          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_8b479.dir\\Debug\\cmTC_8b479.tlog\\" wird erstellt.
         InitializeBuildStatus:
-          "cmTC_7db35.dir\\Debug\\cmTC_7db35.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
-          Aktualisieren des Timestamps von "cmTC_7db35.dir\\Debug\\cmTC_7db35.tlog\\unsuccessfulbuild".
+          "cmTC_8b479.dir\\Debug\\cmTC_8b479.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_8b479.dir\\Debug\\cmTC_8b479.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_7db35.dir\\Debug\\\\" /Fd"cmTC_7db35.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\CheckFunctionExists.cxx"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_8b479.dir\\Debug\\\\" /Fd"cmTC_8b479.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\CheckFunctionExists.cxx"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64
           Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_7db35.dir\\Debug\\\\" /Fd"cmTC_7db35.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\CheckFunctionExists.cxx"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_8b479.dir\\Debug\\\\" /Fd"cmTC_8b479.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\CheckFunctionExists.cxx"
           CheckFunctionExists.cxx
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\Debug\\cmTC_7db35.exe" /INCREMENTAL /ILK:"cmTC_7db35.dir\\Debug\\cmTC_7db35.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-fy6l4t/Debug/cmTC_7db35.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-fy6l4t/Debug/cmTC_7db35.lib" /MACHINE:X64  /machine:x64 cmTC_7db35.dir\\Debug\\CheckFunctionExists.obj
-        LINK : fatal error LNK1104: Datei "pthread.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\cmTC_7db35.vcxproj]
-        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\cmTC_7db35.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\Debug\\cmTC_8b479.exe" /INCREMENTAL /ILK:"cmTC_8b479.dir\\Debug\\cmTC_8b479.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-f6fl9y/Debug/cmTC_8b479.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-f6fl9y/Debug/cmTC_8b479.lib" /MACHINE:X64  /machine:x64 cmTC_8b479.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: Datei "pthread.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\cmTC_8b479.vcxproj]
+        Die Erstellung des Projekts "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\cmTC_8b479.vcxproj" ist abgeschlossen (Standardziele) -- FEHLER.
         
         Fehler beim Buildvorgang.
         
-        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\cmTC_7db35.vcxproj" (Standardziel) (1) ->
+        "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\cmTC_8b479.vcxproj" (Standardziel) (1) ->
         (Link Ziel) -> 
-          LINK : fatal error LNK1104: Datei "pthread.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-fy6l4t\\cmTC_7db35.vcxproj]
+          LINK : fatal error LNK1104: Datei "pthread.lib" kann nicht ge├Âffnet werden. [C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-f6fl9y\\cmTC_8b479.vcxproj]
         
             0 Warnung(en)
             1 Fehler
         
-        Verstrichene Zeit 00:00:00.54
+        Verstrichene Zeit 00:00:00.43
         
       exitCode: 1
   -
@@ -3060,12 +3060,12 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:36 (_qt_internal_find_third_party_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:42 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     checks:
       - "Performing Test HAVE_STDATOMIC"
     directories:
-      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-zcvggl"
-      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-zcvggl"
+      source: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-aytq7x"
+      binary: "C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-aytq7x"
     cmakeVariables:
       CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
       CMAKE_CXX_FLAGS_DEBUG: "/Ob0 /Od /RTC1"
@@ -3076,39 +3076,39 @@ events:
       variable: "HAVE_STDATOMIC"
       cached: true
       stdout: |
-        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-zcvggl'
+        Change Dir: 'C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-aytq7x'
         
-        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_08ac5.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_8aae7.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=18.0 /v:n
         MSBuild-Version 18.11.1-1.26513.3+940033be3 f├╝r .NET Framework
-        Der Buildvorgang wurde am 14.11.2026 23:25:02 gestartet.
+        Der Buildvorgang wurde am 22.11.2026 14:38:48 gestartet.
         
-        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\cmTC_08ac5.vcxproj" auf Knoten "1" (Standardziele).
+        Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\cmTC_8aae7.vcxproj" auf Knoten "1" (Standardziele).
         PrepareForBuild:
           Die strukturierte Ausgabe ist aktiviert. Die Formatierung der Compilerdiagnose spiegelt die Fehlerhierarchie wider. Weitere Informationen finden Sie unter https://aka.ms/cpp/structured-output.
-          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\Debug\\" wird erstellt.
-          Das Verzeichnis "cmTC_08ac5.dir\\Debug\\cmTC_08ac5.tlog\\" wird erstellt.
+          Das Verzeichnis "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\Debug\\" wird erstellt.
+          Das Verzeichnis "cmTC_8aae7.dir\\Debug\\cmTC_8aae7.tlog\\" wird erstellt.
         InitializeBuildStatus:
-          "cmTC_08ac5.dir\\Debug\\cmTC_08ac5.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
-          Aktualisieren des Timestamps von "cmTC_08ac5.dir\\Debug\\cmTC_08ac5.tlog\\unsuccessfulbuild".
+          "cmTC_8aae7.dir\\Debug\\cmTC_8aae7.tlog\\unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+          Aktualisieren des Timestamps von "cmTC_8aae7.dir\\Debug\\cmTC_8aae7.tlog\\unsuccessfulbuild".
         ClCompile:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_STDATOMIC /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_08ac5.dir\\Debug\\\\" /Fd"cmTC_08ac5.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\src.cxx"
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_STDATOMIC /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_8aae7.dir\\Debug\\\\" /Fd"cmTC_8aae7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\src.cxx"
           Microsoft (R) C/C++ Optimizing Compiler Version 19.51.36260 for x64
           Copyright (C) Microsoft Corporation. Alle Rechte vorbehalten.
-          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_STDATOMIC /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_08ac5.dir\\Debug\\\\" /Fd"cmTC_08ac5.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\src.cxx"
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_STDATOMIC /D _MBCS /D "CMAKE_INTDIR=\\"Debug\\"" /EHsc /RTC1 /MDd /std:c++17 /Fo"cmTC_8aae7.dir\\Debug\\\\" /Fd"cmTC_8aae7.dir\\Debug\\vc145.pdb" /external:W1 /TP /errorReport:queue "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\src.cxx"
           src.cxx
         Link:
-          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\Debug\\cmTC_08ac5.exe" /INCREMENTAL /ILK:"cmTC_08ac5.dir\\Debug\\cmTC_08ac5.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-zcvggl/Debug/cmTC_08ac5.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-zcvggl/Debug/cmTC_08ac5.lib" /MACHINE:X64  /machine:x64 cmTC_08ac5.dir\\Debug\\src.obj
-          cmTC_08ac5.vcxproj -> C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\Debug\\cmTC_08ac5.exe
+          C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\VC\\Tools\\MSVC\\14.51.36231\\bin\\HostX64\\x64\\link.exe /OUT:"C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\Debug\\cmTC_8aae7.exe" /INCREMENTAL /ILK:"cmTC_8aae7.dir\\Debug\\cmTC_8aae7.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-aytq7x/Debug/cmTC_8aae7.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /IMPLIB:"C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/CMakeScratch/TryCompile-aytq7x/Debug/cmTC_8aae7.lib" /MACHINE:X64  /machine:x64 cmTC_8aae7.dir\\Debug\\src.obj
+          cmTC_8aae7.vcxproj -> C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\Debug\\cmTC_8aae7.exe
         FinalizeBuildStatus:
-          Die Datei "cmTC_08ac5.dir\\Debug\\cmTC_08ac5.tlog\\unsuccessfulbuild" wird gel├Âscht.
-          Aktualisieren des Timestamps von "cmTC_08ac5.dir\\Debug\\cmTC_08ac5.tlog\\cmTC_08ac5.lastbuildstate".
-        Die Erstellung von Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-zcvggl\\cmTC_08ac5.vcxproj" ist abgeschlossen (Standardziele).
+          Die Datei "cmTC_8aae7.dir\\Debug\\cmTC_8aae7.tlog\\unsuccessfulbuild" wird gel├Âscht.
+          Aktualisieren des Timestamps von "cmTC_8aae7.dir\\Debug\\cmTC_8aae7.tlog\\cmTC_8aae7.lastbuildstate".
+        Die Erstellung von Projekt "C:\\OBS-Development\\creatora_obs_companion\\build\\CMakeFiles\\CMakeScratch\\TryCompile-aytq7x\\cmTC_8aae7.vcxproj" ist abgeschlossen (Standardziele).
         
         Der Buildvorgang wurde erfolgreich ausgef├╝hrt.
             0 Warnung(en)
             0 Fehler
         
-        Verstrichene Zeit 00:00:00.71
+        Verstrichene Zeit 00:00:00.61
         
       exitCode: 0
   -
@@ -3118,7 +3118,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:43 (_qt_internal_find_tool_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:42 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6CoreTools"
     configs:
       -
@@ -3335,7 +3335,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:51 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:42 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6EntryPointPrivate"
     configs:
       -
@@ -3502,7 +3502,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreConfigExtras.cmake:29 (_qt_internal_setup_deploy_support)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:194 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     mode: "program"
     variable: "WINDEPLOYQT_EXECUTABLE"
     description: "Path to a program."
@@ -3699,7 +3699,7 @@ events:
     kind: "find_package-v1"
     backtrace:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6Core"
     configs:
       -
@@ -3882,7 +3882,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:42 (_qt_internal_find_tool_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6GuiTools"
     configs:
       -
@@ -4097,7 +4097,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:42 (_qt_internal_find_tool_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6WidgetsTools"
     configs:
       -
@@ -4319,7 +4319,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:50 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     mode: "path"
     variable: "Vulkan_INCLUDE_DIR"
     description: "Path to a file."
@@ -4508,7 +4508,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:50 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     mode: "library"
     variable: "Vulkan_LIBRARY"
     description: "Path to a library."
@@ -4703,7 +4703,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:50 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     mode: "program"
     variable: "Vulkan_GLSLC_EXECUTABLE"
     description: "Path to a program."
@@ -5151,7 +5151,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:50 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     mode: "program"
     variable: "Vulkan_GLSLANG_VALIDATOR_EXECUTABLE"
     description: "Path to a program."
@@ -5594,7 +5594,7 @@ events:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsDependencies.cmake:50 (_qt_internal_find_qt_dependencies)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6Widgets/Qt6WidgetsConfig.cmake:40 (include)"
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6Gui"
     configs:
       -
@@ -5774,7 +5774,7 @@ events:
     kind: "find_package-v1"
     backtrace:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6Widgets"
     configs:
       -
@@ -5951,7 +5951,7 @@ events:
     kind: "find_package-v1"
     backtrace:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6Network"
     configs:
       -
@@ -6120,7 +6120,7 @@ events:
     kind: "find_package-v1"
     backtrace:
       - "C:/Qt/6.11.1/msvc2022_64/lib/cmake/Qt6/Qt6Config.cmake:253 (find_package)"
-      - "CMakeLists.txt:46 (find_package)"
+      - "CMakeLists.txt:47 (find_package)"
     name: "Qt6WebSockets"
     configs:
       -

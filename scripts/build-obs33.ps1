@@ -8,6 +8,7 @@ param(
     [ValidateSet('Release', 'RelWithDebInfo', 'Debug')]
     [string]$Configuration = 'Release',
     [int]$Parallel = 4,
+    [string]$GitHubRepository = '',
     [switch]$Clean
 )
 
@@ -61,7 +62,8 @@ $argsConfigure = @(
     "-DCMAKE_MODULE_PATH=$($finderDir.Replace('\','/'))",
     "-DSIMDe_INCLUDE_DIR=$($simdeInclude.Replace('\','/'))",
     "-DCMAKE_PREFIX_PATH=$prefix",
-    "-DQt6_DIR=$($qtConfigDir.Replace('\','/'))"
+    "-DQt6_DIR=$($qtConfigDir.Replace('\','/'))",
+    "-DCREATORA_GITHUB_REPOSITORY=$GitHubRepository"
 )
 Write-Host 'Configuring Creatora OBS Companion for OBS Studio 33.0.1...'
 & cmake @argsConfigure

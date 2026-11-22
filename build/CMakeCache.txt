@@ -247,6 +247,9 @@ CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//owner/repo hosting public GitHub Releases
+CREATORA_GITHUB_REPOSITORY:STRING=
+
 //OBS 33 SDK installation/build root (containing libobsConfig.cmake)
 OBS_SDK_ROOT:PATH=
 

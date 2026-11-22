@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 project(creatora-obs-companion VERSION 0.1.1 LANGUAGES CXX)
+set(CREATORA_GITHUB_REPOSITORY "" CACHE STRING "owner/repo hosting public GitHub Releases")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -61,12 +62,20 @@ add_library(creatora-obs-companion MODULE
   src/companion.cpp
   src/companion.hpp
 )
+target_compile_definitions(creatora-obs-companion PRIVATE
+  CREATORA_PLUGIN_VERSION="${PROJECT_VERSION}"
+  CREATORA_RELEASE_REPOSITORY="${CREATORA_GITHUB_REPOSITORY}"
+)
 target_link_libraries(creatora-obs-companion PRIVATE
   OBS::libobs OBS::obs-frontend-api
   Qt6::Core Qt6::Widgets Qt6::Network Qt6::WebSockets
 )
 if(WIN32)
-  target_link_libraries(creatora-obs-companion PRIVATE Crypt32)
+  target_compile_definitions(creatora-obs-companion PRIVATE
+  CREATORA_PLUGIN_VERSION="${PROJECT_VERSION}"
+  CREATORA_RELEASE_REPOSITORY="${CREATORA_GITHUB_REPOSITORY}"
+)
+target_link_libraries(creatora-obs-companion PRIVATE Crypt32)
 endif()
 set_target_properties(creatora-obs-companion PROPERTIES
   PREFIX ""

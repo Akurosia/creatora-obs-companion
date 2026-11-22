@@ -1,3 +1,5 @@
+> **CI / releases / update notices:** See [RELEASING.md](RELEASING.md). GitHub tags publish versioned Windows x64 ZIPs via a preconfigured OBS 33 Windows runner; the OBS dock checks public GitHub Releases for newer versions (manual install only).
+
 # Creatora OBS Companion — OBS Studio 33 (Windows x64)
 
 Native source plugin. The server API is specified separately in `docs/CODEX_SERVER_IMPLEMENTATION.md`; it must be implemented before pairing works.

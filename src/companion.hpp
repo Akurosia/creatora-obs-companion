@@ -20,7 +20,7 @@ public:
 private:
     QString baseUrl_ = "https://creatora.org";
     QString deviceId_, accessToken_, refreshToken_, pairingId_, verifier_;
-    QLabel *status_ = nullptr, *pairingCode_ = nullptr;
+    QLabel *status_ = nullptr, *pairingCode_ = nullptr, *updateInfo_ = nullptr;
     QLineEdit *urlInput_ = nullptr;
     QPushButton *pairButton_ = nullptr, *connectButton_ = nullptr, *disconnectButton_ = nullptr, *unpairButton_ = nullptr;
     QCheckBox *autoConnect_ = nullptr;
@@ -32,6 +32,7 @@ private:
     bool desiredConnected_ = false, shuttingDown_ = false, refreshing_ = false;
     int retryAttempt_ = 0;
     void setStatus(const QString &text);
+    void checkForUpdates();
     void startPairing();
     void pollPairing();
     void connectNow();

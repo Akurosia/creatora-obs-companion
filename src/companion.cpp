@@ -17,6 +17,8 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QNetworkReply>
+#include <QUrlQuery>
+#include <QVersionNumber>
 #include <QNetworkRequest>
 #include <QPushButton>
 #include <QRandomGenerator>
@@ -40,6 +42,12 @@ constexpr auto kSettingsGroup = "CreatoraObsCompanion";
 constexpr int kMaxReplyBytes = 32768;
 constexpr int kMaxCommandBytes = 8192;
 constexpr int kMaxClockSkewMs = 5000;
+#ifndef CREATORA_PLUGIN_VERSION
+#define CREATORA_PLUGIN_VERSION "0.0.0"
+#endif
+#ifndef CREATORA_RELEASE_REPOSITORY
+#define CREATORA_RELEASE_REPOSITORY ""
+#endif
 
 // Per-OS-user credential encryption. Windows only for this initial release.
 QByteArray protect(QByteArray data)
@@ -91,6 +99,17 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
     status_ = new QLabel("Disconnected", this);
     status_->setWordWrap(true);
     layout->addWidget(status_);
+    auto *updateRow = new QHBoxLayout;
+    updateInfo_ = new QLabel(QString("Version %1").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)), this);
+    updateInfo_->setWordWrap(true);
+    updateInfo_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    updateInfo_->setOpenExternalLinks(true);
+    auto *checkUpdatesButton = new QPushButton("Check updates", this);
+    updateRow->addWidget(updateInfo_, 1);
+    updateRow->addWidget(checkUpdatesButton);
+    layout->addLayout(updateRow);
+    connect(checkUpdatesButton, &QPushButton::clicked, this, &CreatoraCompanion::checkForUpdates);
+
     urlInput_ = new QLineEdit(this);
     urlInput_->setPlaceholderText("https://creatora.example.com");
     auto *form = new QFormLayout;
@@ -217,6 +236,7 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         else if (payload.value("type").toString() == "ping")
             socket_.sendTextMessage(QStringLiteral("{\"type\":\"pong\"}"));
     });
+    QTimer::singleShot(5000, this, &CreatoraCompanion::checkForUpdates);
     if (autoConnect_->isChecked() && !refreshToken_.isEmpty()) {
         QTimer::singleShot(1500, this, &CreatoraCompanion::connectNow);
     }
@@ -520,4 +540,50 @@ void CreatoraCompanion::forgetSecrets()
     QSettings settings("Creatora", kSettingsGroup);
     settings.remove("encrypted_credentials");
     settings.sync();
+}
+
+void CreatoraCompanion::checkForUpdates()
+{
+    const QString repository = QStringLiteral(CREATORA_RELEASE_REPOSITORY);
+    static const QRegularExpression validRepo("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$");
+    if (!validRepo.match(repository).hasMatch()) {
+        updateInfo_->setText(QString("Version %1 — release repository not configured").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        return;
+    }
+    const QUrl url("https://api.github.com/repos/" + repository + "/releases/latest");
+    QNetworkRequest request(url);
+    request.setRawHeader("Accept", "application/vnd.github+json");
+    request.setRawHeader("User-Agent", "Creatora-OBS-Companion/" CREATORA_PLUGIN_VERSION);
+    request.setRawHeader("X-GitHub-Api-Version", "2022-11-28");
+    auto *reply = network_.get(request);
+    auto *timeout = new QTimer(reply);
+    timeout->setSingleShot(true);
+    connect(timeout, &QTimer::timeout, reply, &QNetworkReply::abort);
+    timeout->start(10000);
+    updateInfo_->setText(QString("Version %1 — checking…").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+    connect(reply, &QNetworkReply::finished, this, [this, reply, repository] {
+        const QByteArray data = reply->read(32769);
+        if (reply->error() != QNetworkReply::NoError || data.size() > 32768) {
+            updateInfo_->setText(QString("Version %1 — update check unavailable").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+            reply->deleteLater();
+            return;
+        }
+        const auto document = QJsonDocument::fromJson(data);
+        const QJsonObject release = document.isObject() ? document.object() : QJsonObject{};
+        const QString tag = release.value("tag_name").toString();
+        QString normalizedTag = tag;
+        if (normalizedTag.startsWith('v')) normalizedTag.remove(0, 1);
+        const QVersionNumber latest = QVersionNumber::fromString(normalizedTag);
+        const QVersionNumber current = QVersionNumber::fromString(QStringLiteral(CREATORA_PLUGIN_VERSION));
+        if (latest.isNull() || current.isNull() || normalizedTag != latest.toString()) {
+            updateInfo_->setText(QString("Version %1 — unknown release version").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        } else if (QVersionNumber::compare(latest, current) > 0) {
+            const QString releaseUrl = "https://github.com/" + repository + "/releases/tag/" + QString::fromUtf8(QUrl::toPercentEncoding(tag));
+            updateInfo_->setText(QString("Version %1 — <a href=\"%2\">Update %3 available</a> (restart OBS after installation)")
+                                     .arg(QStringLiteral(CREATORA_PLUGIN_VERSION), releaseUrl.toHtmlEscaped(), tag.toHtmlEscaped()));
+        } else {
+            updateInfo_->setText(QString("Version %1 — up to date").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        }
+        reply->deleteLater();
+    });
 }
