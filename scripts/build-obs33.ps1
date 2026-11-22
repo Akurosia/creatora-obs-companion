@@ -9,6 +9,7 @@ param(
     [string]$Configuration = 'Release',
     [int]$Parallel = 4,
     [string]$GitHubRepository = '',
+    [switch]$SkipLegacyPackage,
     [switch]$Clean
 )
 
@@ -19,7 +20,11 @@ if ([string]::IsNullOrWhiteSpace($BuildDir)) {
 }
 
 $obsBuild = Join-Path $ObsRoot 'build_x64'
-$obsDeps = Join-Path $ObsRoot '.deps\obs-deps-2026-10-23-x64'
+# Resolve dependency version from the OBS checkout, not a hardcoded local date.
+$obsDeps = Get-ChildItem -LiteralPath (Join-Path $ObsRoot '.deps') -Directory -Filter 'obs-deps-*-x64' -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notlike 'obs-deps-qt6-*' -and (Test-Path (Join-Path $_.FullName 'include\simde\simde-common.h')) } |
+    Sort-Object Name -Descending | Select-Object -First 1 -ExpandProperty FullName
+if (-not $obsDeps) { throw 'OBS prebuilt dependencies are missing; configure OBS via its CMake preset first.' }
 $libobsDir = Join-Path $obsBuild 'libobs'
 $frontendDir = Join-Path $obsBuild 'frontend\api'
 $pthreadsDir = Join-Path $obsBuild 'deps\w32-pthreads'
@@ -76,6 +81,9 @@ if ($LASTEXITCODE -ne 0) { throw "CMake build failed (exit $LASTEXITCODE)." }
 Write-Host 'Build completed. Plugin DLL(s):'
 Get-ChildItem -LiteralPath $BuildDir -Recurse -Filter '*creatora*.dll' -File -ErrorAction SilentlyContinue |
     Select-Object -ExpandProperty FullName
+
+# Automatically create the legacy ZIP for local builds unless CI disables it.
+if ($SkipLegacyPackage) { return }
 
 # Automatically create the shipping ZIP in the project root after a successful build.
 # The archive is not extracted or installed anywhere by this script.

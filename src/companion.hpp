@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QSet>
 #include <QQueue>
+#include <QHash>
 
 class QLineEdit;
 class QLabel;
@@ -29,6 +30,7 @@ private:
     QTimer pairingPoll_, retryTimer_, tokenRefresh_;
     QSet<QString> seen_;
     QQueue<QString> seenOrder_;
+    QHash<QString, qint64> recentScreenshots_;
     bool desiredConnected_ = false, shuttingDown_ = false, refreshing_ = false;
     int retryAttempt_ = 0;
     void setStatus(const QString &text);
@@ -39,6 +41,7 @@ private:
     void openSocket();
     void refreshCredentials(bool andConnect);
     void processCommand(const QJsonObject &command);
+    void captureScreenshot(const QString &id, qint64 expiry, const QJsonObject &args);
     void sendResult(const QString &id, bool ok, const QString &reason);
     void request(const QString &path, const QJsonObject &body,
                  const std::function<void(int, QJsonObject)> &done,

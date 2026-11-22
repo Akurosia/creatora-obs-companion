@@ -3,6 +3,7 @@ C:/OBS-Development/creatora_obs_companion/src/companion.hpp
  mmc:Q_OBJECT
  mdp:C:/OBS-Development/creatora_obs_companion/src/companion.hpp
  mdp:C:/Qt/6.11.1/msvc2022_64/include/QtCore/QFlags
+ mdp:C:/Qt/6.11.1/msvc2022_64/include/QtCore/QHash
  mdp:C:/Qt/6.11.1/msvc2022_64/include/QtCore/QJsonObject
  mdp:C:/Qt/6.11.1/msvc2022_64/include/QtCore/QList
  mdp:C:/Qt/6.11.1/msvc2022_64/include/QtCore/QMetaType

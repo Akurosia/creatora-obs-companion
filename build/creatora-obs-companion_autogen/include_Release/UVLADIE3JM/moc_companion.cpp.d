@@ -1,5 +1,6 @@
 C:/OBS-Development/creatora_obs_companion/build/creatora-obs-companion_autogen/include_Release/UVLADIE3JM/moc_companion.cpp: C:/OBS-Development/creatora_obs_companion/src/companion.hpp \
   C:/Qt/6.11.1/msvc2022_64/include/QtCore/QFlags \
+  C:/Qt/6.11.1/msvc2022_64/include/QtCore/QHash \
   C:/Qt/6.11.1/msvc2022_64/include/QtCore/QJsonObject \
   C:/Qt/6.11.1/msvc2022_64/include/QtCore/QList \
   C:/Qt/6.11.1/msvc2022_64/include/QtCore/QMetaType \

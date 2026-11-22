@@ -27,6 +27,9 @@
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QPointer>
+#include <QUuid>
+#include <QByteArray>
+#include <QUrlQuery>
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -36,18 +39,100 @@
 #endif
 #include <algorithm>
 #include <functional>
+#include <memory>
 
 namespace {
 constexpr auto kSettingsGroup = "CreatoraObsCompanion";
 constexpr int kMaxReplyBytes = 32768;
 constexpr int kMaxCommandBytes = 8192;
 constexpr int kMaxClockSkewMs = 5000;
+constexpr int kMaxScreenshotBytes = 2000000;
 #ifndef CREATORA_PLUGIN_VERSION
 #define CREATORA_PLUGIN_VERSION "0.0.0"
 #endif
 #ifndef CREATORA_RELEASE_REPOSITORY
 #define CREATORA_RELEASE_REPOSITORY ""
 #endif
+
+// OBS WebSocket exposes its request API to in-process OBS plugins via the
+// global OBS proc handler. This does not require a second local socket/password.
+struct ScreenshotResponse {
+    unsigned int status_code;
+    char *comment;
+    char *response_data;
+};
+
+QJsonObject obsScreenshot(const QJsonObject &args, QString &error)
+{
+    proc_handler_t *global = obs_get_proc_handler();
+    calldata_t getApi{};
+    if (!global || !proc_handler_call(global, "obs_websocket_api_get_ph", &getApi)) {
+        error = "OBS WebSocket unavailable";
+        calldata_free(&getApi);
+        return {};
+    }
+    auto *handler = static_cast<proc_handler_t *>(calldata_ptr(&getApi, "ph"));
+    calldata_free(&getApi);
+    if (!handler) { error = "OBS WebSocket unavailable"; return {}; }
+
+    QJsonObject request{{"sourceName", args.value("source_name")},
+        {"imageFormat", args.value("image_format")},
+        {"imageWidth", args.value("image_width")},
+        {"imageHeight", args.value("image_height")},
+        {"imageCompressionQuality", args.value("image_compression_quality")}};
+    const QByteArray json = QJsonDocument(request).toJson(QJsonDocument::Compact);
+    calldata_t data{};
+    calldata_set_string(&data, "request_type", "GetSourceScreenshot");
+    calldata_set_string(&data, "request_data", json.constData());
+    const bool called = proc_handler_call(handler, "call_request", &data);
+    auto *response = static_cast<ScreenshotResponse *>(calldata_ptr(&data, "response"));
+    QJsonObject result;
+    if (called && response && response->status_code == 100 && response->response_data) {
+        const auto parsed = QJsonDocument::fromJson(QByteArray(response->response_data));
+        if (parsed.isObject()) result = parsed.object();
+        else error = "OBS screenshot failed";
+    } else error = response && response->status_code == 600 ? "Source not found" : "OBS screenshot failed";
+    if (response) {
+        if (response->comment) bfree(response->comment);
+        if (response->response_data) bfree(response->response_data);
+        bfree(response);
+    }
+    calldata_free(&data);
+    return result;
+}
+
+bool isUuid(const QString &text)
+{
+    static const QRegularExpression re("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+    return re.match(text).hasMatch() && !QUuid(text).isNull();
+}
+
+bool validUploadPath(const QString &path, const QString &captureId)
+{
+    const QString expected = "/api/obs-companion/v1/polaroid/captures/" + captureId + "/upload";
+    // Exact match excludes URL schemes, hosts, escapes, traversal, query and fragment.
+    return path == expected;
+}
+
+bool validScreenshotArgs(const QString &id, const QJsonObject &args)
+{
+    const QString captureId = args.value("capture_id").toString();
+    const QString name = args.value("source_name").toString();
+    const QString format = args.value("image_format").toString();
+    const QString token = args.value("upload_token").toString();
+    static const QRegularExpression tokenRe("^[A-Za-z0-9_-]{43}$");
+    auto numberInRange = [&args](const char *key, int lo, int hi) {
+        const auto value = args.value(QLatin1String(key));
+        return value.isDouble() && value.toDouble() >= lo && value.toDouble() <= hi &&
+               value.toDouble() == int(value.toDouble());
+    };
+    return isUuid(id) && isUuid(captureId) && !name.trimmed().isEmpty() && name.size() <= 256 &&
+           (format == "png" || format == "jpeg") &&
+           numberInRange("image_width", 160, 1920) && numberInRange("image_height", 90, 1080) &&
+           numberInRange("image_compression_quality", 30, 100) &&
+           validUploadPath(args.value("upload_path").toString(), captureId) &&
+           tokenRe.match(token).hasMatch();
+}
 
 // Per-OS-user credential encryption. Windows only for this initial release.
 QByteArray protect(QByteArray data)
@@ -145,6 +230,9 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
     auto *notice = new QLabel("Automatic connection gives Creatora permission to execute the enabled OBS actions whenever OBS is open. Only enable it on a trusted PC and account. Disconnect to stop remote control.", this);
     notice->setWordWrap(true);
     layout->addWidget(notice);
+    auto *capability = new QLabel("Capabilities: Scene switching, scene visibility, input mute, Source screenshots / Polaroids", this);
+    capability->setWordWrap(true);
+    layout->addWidget(capability);
     layout->addStretch();
     loadSettings();
     urlInput_->setText(baseUrl_);
@@ -217,7 +305,7 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         tokenRefresh_.start();
         setStatus("Connected (remote control enabled)");
         QJsonObject hello{{"type", "hello"}, {"protocol", 1}, {"device_id", deviceId_},
-                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute"}}};
+                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute", "source.screenshot"}}};
         socket_.sendTextMessage(QString::fromUtf8(QJsonDocument(hello).toJson(QJsonDocument::Compact)));
     });
     connect(&socket_, &QWebSocket::disconnected, this, [this] {
@@ -443,12 +531,18 @@ void CreatoraCompanion::processCommand(const QJsonObject &message)
     const QString action = message.value("action").toString();
     const qint64 expiry = qint64(message.value("expires_at_ms").toDouble());
     if (id.size() < 16 || id.size() > 128 || !message.value("args").isObject()) return;
-    if (seen_.contains(id)) { sendResult(id, false, "duplicate"); return; }
+    if (action == "source.screenshot" && recentScreenshots_.contains(id) &&
+        recentScreenshots_.value(id) >= QDateTime::currentMSecsSinceEpoch() - 60000) return;
+    if (seen_.contains(id)) { if (action != "source.screenshot") sendResult(id, false, "duplicate"); return; }
     seen_.insert(id); seenOrder_.enqueue(id);
     while (seenOrder_.size() > 512) seen_.remove(seenOrder_.dequeue());
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
-    if (expiry < now - kMaxClockSkewMs || expiry > now + 30000) { sendResult(id, false, "expired_or_invalid_ttl"); return; }
+    if (expiry < now - (action == "source.screenshot" ? 0 : kMaxClockSkewMs) || expiry > now + 30000) { sendResult(id, false, "expired_or_invalid_ttl"); return; }
     const QJsonObject args = message.value("args").toObject();
+    if (action == "source.screenshot") {
+        captureScreenshot(id, expiry, args);
+        return;
+    }
     bool ok = false;
     QString reason = "unsupported_action";
     if (action == "scene.switch") {
@@ -496,6 +590,99 @@ void CreatoraCompanion::processCommand(const QJsonObject &message)
     }
     sendResult(id, ok, reason);
 }
+void CreatoraCompanion::captureScreenshot(const QString &id, qint64 expiry, const QJsonObject &args)
+{
+    // Keep screenshot command ids for at least one minute even if 512 other
+    // commands arrive. Never re-execute a redelivered screenshot.
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    for (auto it = recentScreenshots_.begin(); it != recentScreenshots_.end();) {
+        if (it.value() < now - 60000) it = recentScreenshots_.erase(it);
+        else ++it;
+    }
+    recentScreenshots_.insert(id, now);
+    auto fail = [this, id](const QString &reason) {
+        blog(LOG_WARNING, "[Creatora] Polaroid: %s", reason.toUtf8().constData());
+        sendResult(id, false, reason.left(100));
+    };
+    if (!validScreenshotArgs(id, args)) { fail("Invalid screenshot command"); return; }
+    if (expiry <= now) { fail("Command expired"); return; }
+    if (socket_.state() != QAbstractSocket::ConnectedState || !desiredConnected_) {
+        fail("Companion disconnected"); return;
+    }
+    if (!isSecureEndpoint()) { fail("Invalid HTTPS server"); return; }
+
+    // Data URLs never appear in diagnostics or retained settings.
+    QString error;
+    QJsonObject captured = obsScreenshot(args, error);
+    if (!error.isEmpty()) { fail(error); return; }
+    const QString mime = args.value("image_format").toString() == "jpeg" ? "image/jpeg" : "image/png";
+    QString data = captured.value("imageData").toString();
+    captured = {};
+    const QString prefix = "data:" + mime + ";base64,";
+    if (!data.startsWith(prefix)) { fail("Invalid screenshot image"); return; }
+    const QString encoded = data.mid(prefix.size());
+    if (encoded.isEmpty() || encoded.size() > ((kMaxScreenshotBytes + 2) / 3) * 4 + 4) {
+        fail("Screenshot exceeds 2 MB"); return;
+    }
+    const QByteArray bytes = QByteArray::fromBase64(encoded.toLatin1(), QByteArray::AbortOnBase64DecodingErrors);
+    if (bytes.isEmpty()) { fail("Invalid screenshot image"); return; }
+    if (bytes.size() > kMaxScreenshotBytes) { fail("Screenshot exceeds 2 MB"); return; }
+
+    QUrl base(baseUrl_);
+    // Preserve configured origin, not any path supplied by the remote command.
+    base.setPath(args.value("upload_path").toString());
+    base.setQuery(QString());
+    base.setFragment(QString());
+    if (base.scheme() != "https") { fail("Invalid HTTPS server"); return; }
+
+    QNetworkRequest req(base);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    req.setRawHeader("Cache-Control", "no-store");
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::ManualRedirectPolicy);
+    // One-time capture token only. Do NOT send companion bearer access token.
+    QByteArray body = QJsonDocument(QJsonObject{
+        {"upload_token", args.value("upload_token")},
+        {"mime_type", mime}, {"data", data}
+    }).toJson(QJsonDocument::Compact);
+    data.clear();
+    auto send = std::make_shared<std::function<void(int)>>();
+    const QPointer<CreatoraCompanion> self(this);
+    *send = [this, self, req, body = std::move(body), id, expiry, send](int attempt) mutable {
+        if (!self) return;
+        if (QDateTime::currentMSecsSinceEpoch() >= expiry) {
+            sendResult(id, false, "Upload expired");
+            QTimer::singleShot(0, this, [send] { *send = {}; }); return;
+        }
+        auto *reply = network_.post(req, body);
+        auto *timeout = new QTimer(reply);
+        timeout->setSingleShot(true);
+        connect(timeout, &QTimer::timeout, reply, &QNetworkReply::abort);
+        timeout->start(10000);
+        connect(reply, &QNetworkReply::finished, reply, [this, self, reply, id, expiry, attempt, send]() {
+            const int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            const bool transportFailure = status == 0;
+            const bool retryable = transportFailure || (status >= 500 && status <= 599);
+            reply->deleteLater();
+            if (!self) { *send = {}; return; }
+            if (status == 204 || (status >= 200 && status < 300)) {
+                sendResult(id, true, "");
+            } else if (retryable && attempt == 0 && QDateTime::currentMSecsSinceEpoch() < expiry) {
+                (*send)(1);
+            } else {
+                const QString reason = status == 410 ? "Upload expired" :
+                    status == 0 ? "Upload failed (network)" :
+                    QString("Upload failed (HTTP %1)").arg(status);
+                blog(LOG_WARNING, "[Creatora] Polaroid: upload failed with HTTP %d", status);
+                sendResult(id, false, reason.left(100));
+            }
+            if (!(retryable && attempt == 0 && QDateTime::currentMSecsSinceEpoch() < expiry &&
+                  !(status >= 200 && status < 300)))
+                QTimer::singleShot(0, this, [send] { *send = {}; });
+        });
+    };
+    (*send)(0);
+}
+
 void CreatoraCompanion::loadSettings()
 {
     QSettings settings("Creatora", kSettingsGroup);

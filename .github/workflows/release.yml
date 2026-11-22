@@ -1,59 +1,158 @@
 name: Build and release OBS Companion
+
 on:
   push:
     branches: [main]
     tags: ['v*.*.*']
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: obs-companion-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+
+env:
+  OBS_VERSION: '33.0.1'
+  QT_VERSION: '6.11.1'
+
 jobs:
-  windows:
-    # Requires a private, trusted machine with OBS 33 development build and Qt 6.11.1.
-    # Do not run untrusted pull requests on this runner.
-    runs-on: [self-hosted, Windows, X64, obs33]
+  windows-x64:
+    name: Windows x64 / OBS 33
+    runs-on: windows-2022
+    timeout-minutes: 120
     permissions:
-      contents: write
-    timeout-minutes: 45
+      contents: ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'write' || 'read' }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Validate release version
-        shell: pwsh
-        run: |
-          $cmakeVersion = (Select-String -Path CMakeLists.txt -Pattern 'project\(creatora-obs-companion VERSION (\d+\.\d+\.\d+)' ).Matches.Groups[1].Value
-          if (-not $cmakeVersion) { throw 'Could not read CMake project version' }
-          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') { throw 'Release tags must be vMAJOR.MINOR.PATCH' }
-          "PLUGIN_VERSION=$cmakeVersion" | Out-File -FilePath $env:GITHUB_ENV -Append
-          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne "v$cmakeVersion") { throw "Tag $env:GITHUB_REF_NAME does not match CMake version v$cmakeVersion" }
-      - name: Build against OBS 33 SDK
-        shell: pwsh
-        env:
-          OBS_SOURCE_ROOT: ${{ vars.OBS_SOURCE_ROOT }}
-          QT_ROOT: ${{ vars.QT_ROOT }}
-        run: |
-          if (-not $env:OBS_SOURCE_ROOT -or -not $env:QT_ROOT) { throw 'Configure repository variables OBS_SOURCE_ROOT and QT_ROOT on the self-hosted runner' }
-          ./scripts/build-obs33.ps1 -ObsRoot $env:OBS_SOURCE_ROOT -QtRoot $env:QT_ROOT -GitHubRepository '${{ github.repository }}' -Clean
-      - name: Package versioned release
-        shell: pwsh
-        env:
-          OBS_QT_CORE_DLL: ${{ vars.OBS_QT_CORE_DLL }}
-          QT_ROOT: ${{ vars.QT_ROOT }}
-        run: |
-          ./scripts/package-release.ps1 -QtRoot $env:QT_ROOT -Version $env:PLUGIN_VERSION -ObsQtCoreDll $env:OBS_QT_CORE_DLL
-      - name: Upload test artifacts
-        uses: actions/upload-artifact@v4
+      - name: Check out companion
+        uses: actions/checkout@v4
         with:
-          name: creatora-obs-companion-windows-x64
-          path: dist/*
-          if-no-files-found: error
-      - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+          path: companion
+          persist-credentials: false
+
+      - name: Check out OBS Studio
+        uses: actions/checkout@v4
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The OBS dependency Qt bundle did not contain Qt WebSockets in the
+      # original tested build. Install the exact MSVC Qt runtime OBS 33 uses.
+      - name: Install Qt and WebSockets
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: qtwebsockets
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git
+          cache: true
+
+      - name: Verify version and toolchain
+        id: version
+        shell: pwsh
+        working-directory: companion
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $match = Select-String -Path CMakeLists.txt -Pattern 'project\(creatora-obs-companion VERSION (\d+\.\d+\.\d+)'
+          if (-not $match) { throw 'Unable to read CMake version' }
+          $version = $match.Matches[0].Groups[1].Value
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") {
+            throw "Release tag $env:GITHUB_REF_NAME does not match CMake version v$version"
+          }
+          if (-not $env:QT_ROOT_DIR) { throw 'Qt installer did not expose QT_ROOT_DIR' }
+          if (-not (Test-Path "$env:QT_ROOT_DIR/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfig.cmake")) {
+            throw 'Qt WebSockets development module was not installed'
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "qt_root=$($env:QT_ROOT_DIR)" >> $env:GITHUB_OUTPUT
+
+      - name: Configure OBS development libraries
+        shell: pwsh
+        working-directory: obs-studio
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Bootstrap from OBS 33's own CMake presets: downloads its pinned
+          # dependencies instead of assuming they exist on the runner.
+          cmake --preset windows-x64 -G 'Visual Studio 17 2022' -A x64 `
+            -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF -DENABLE_AJA=OFF `
+            -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF `
+            "-DQt6_DIR=$($env:QT_ROOT_DIR.Replace('\','/'))/lib/cmake/Qt6"
+          if ($LASTEXITCODE -ne 0) { throw 'OBS configure failed' }
+
+      - name: Build OBS frontend and libobs development libraries
+        shell: pwsh
+        working-directory: obs-studio
+        run: |
+          cmake --build build_x64 --target obs-frontend-api --config Release --parallel 4
+          if ($LASTEXITCODE -ne 0) { throw 'OBS development library build failed' }
+
+      - name: Build companion against OBS 33
+        shell: pwsh
+        working-directory: companion
+        run: |
+          ./scripts/build-obs33.ps1 `
+            -ObsRoot '${{ github.workspace }}\obs-studio' `
+            -QtRoot '${{ steps.version.outputs.qt_root }}' `
+            -GitHubRepository '${{ github.repository }}' `
+            -SkipLegacyPackage -Clean
+
+      # Check against the real OBS 33 distribution rather than assuming the
+      # downloaded OBS *development* Qt package is the runtime version.
+      - name: Download official OBS runtime for compatibility validation
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $assets = @(Get-ChildItem -LiteralPath dist -File | Select-Object -ExpandProperty FullName)
-          if ($assets.Count -ne 2) { throw "Expected ZIP and SHA256 assets, got $($assets.Count)" }
-          gh release create "$env:GITHUB_REF_NAME" @assets --verify-tag --generate-notes --title "Creatora OBS Companion $env:GITHUB_REF_NAME"
-          if ($LASTEXITCODE -ne 0) { throw "GitHub Release creation failed ($LASTEXITCODE)" }
+          New-Item -ItemType Directory -Force obs-runtime | Out-Null
+          gh release download "$env:OBS_VERSION" --repo obsproject/obs-studio `
+            --pattern "OBS-Studio-$env:OBS_VERSION-Windows-x64.zip" --dir obs-runtime
+          if ($LASTEXITCODE -ne 0) { throw 'Could not download OBS runtime ZIP' }
+          $archive = Get-ChildItem obs-runtime -Filter '*.zip' | Select-Object -First 1
+          if (-not $archive) { throw 'Missing OBS runtime ZIP' }
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath obs-runtime/extracted
+          $core = Get-ChildItem obs-runtime/extracted -Recurse -Filter Qt6Core.dll -File |
+            Where-Object { $_.FullName -match 'bin[\\/]64bit' } | Select-Object -First 1
+          if (-not $core) { throw 'Could not find OBS Qt6Core.dll' }
+          "OBS_QT_CORE_DLL=$($core.FullName)" >> $env:GITHUB_ENV
+
+      - name: Package distribution and SHA-256
+        shell: pwsh
+        working-directory: companion
+        run: |
+          ./scripts/package-release.ps1 `
+            -QtRoot '${{ steps.version.outputs.qt_root }}' `
+            -Version '${{ steps.version.outputs.version }}' `
+            -ObsQtCoreDll "$env:OBS_QT_CORE_DLL"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: creatora-obs-companion-obs33-windows-x64
+          path: companion/dist/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        shell: pwsh
+        working-directory: companion
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = @(Get-ChildItem dist -File | Select-Object -ExpandProperty FullName)
+          if ($assets.Count -ne 2) { throw 'Expected exactly a ZIP and SHA256 file' }
+          gh release create "$env:GITHUB_REF_NAME" @assets --verify-tag --generate-notes `
+            --title "Creatora OBS Companion $env:GITHUB_REF_NAME"
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to publish GitHub Release' }
