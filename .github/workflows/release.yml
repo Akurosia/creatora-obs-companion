@@ -162,7 +162,7 @@ jobs:
   # credential storage, OBS loading, and package layout are verified on-device.
   macos:
     name: macOS x86_64 / OBS 33 (experimental)
-    runs-on: macos-15-intel
+    runs-on: macos-26-intel
     timeout-minutes: 120
     continue-on-error: true
     steps:
@@ -188,6 +188,11 @@ jobs:
           arch: clang_64
           modules: qtwebsockets
           cache: true
+      - name: Verify macOS SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+          test "$(xcrun --sdk macosx --show-sdk-version | cut -d. -f1)" -ge 26
       - name: Configure OBS development libraries
         working-directory: obs-studio
         run: |
@@ -218,7 +223,7 @@ jobs:
 
   linux:
     name: Linux x86_64 / OBS 33 (experimental)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     timeout-minutes: 120
     continue-on-error: true
     steps:
@@ -250,6 +255,10 @@ jobs:
             libqrcodegencpp-dev uthash-dev libsimde-dev libspeexdsp-dev \
             qt6-base-dev qt6-base-private-dev qt6-svg-dev qt6-websockets-dev \
             libsecret-1-dev
+      - name: Verify FFmpeg toolchain
+        run: |
+          pkg-config --modversion libavcodec
+          test "$(pkg-config --modversion libavcodec | cut -d. -f1)" -ge 62
       - name: Configure OBS 33 development libraries
         run: |
           cmake -S obs-studio -B obs-studio/build_ubuntu -G Ninja \
