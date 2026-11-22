@@ -66,11 +66,14 @@ jobs:
         working-directory: companion
         run: |
           $ErrorActionPreference = 'Stop'
-          $match = Select-String -Path CMakeLists.txt -Pattern 'project\(creatora-obs-companion VERSION (\d+\.\d+\.\d+)'
-          if (-not $match) { throw 'Unable to read CMake version' }
-          $version = $match.Matches[0].Groups[1].Value
-          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") {
-            throw "Release tag $env:GITHUB_REF_NAME does not match CMake version v$version"
+          # Git tags are the only source of release versions.
+          # Branch, PR, and manual builds without a tag use 0.0.0.
+          $version = '0.0.0'
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+\\.[0-9]+\\.[0-9]+)$') {
+              throw "Expected release tag vMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
+            }
+            $version = $Matches[1]
           }
           if (-not $env:QT_ROOT_DIR) { throw 'Qt installer did not expose QT_ROOT_DIR' }
           if (-not (Test-Path "$env:QT_ROOT_DIR/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfig.cmake")) {
@@ -107,6 +110,7 @@ jobs:
             -ObsRoot '${{ github.workspace }}\obs-studio' `
             -QtRoot '${{ steps.version.outputs.qt_root }}' `
             -GitHubRepository '${{ github.repository }}' `
+            -Version '${{ steps.version.outputs.version }}' `
             -SkipLegacyPackage -Clean
 
       # Check against the real OBS 33 distribution rather than assuming the
@@ -207,7 +211,8 @@ jobs:
             -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
             -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
             -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-universal" \
-            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$(if [[ "$GITHUB_REF_TYPE" == tag ]]; then echo "${GITHUB_REF_NAME#v}"; else echo 0.0.0; fi)"
       - name: Build companion
         run: cmake --build companion/build-macos --config Release --parallel 4
       - name: Archive experimental binaries
@@ -299,7 +304,8 @@ jobs:
             -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/libobs" \
             -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/frontend/api" \
             -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
-            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$(if [[ "$GITHUB_REF_TYPE" == tag ]]; then echo "${GITHUB_REF_NAME#v}"; else echo 0.0.0; fi)"
       - name: Build companion
         run: cmake --build companion/build-linux --parallel 4
       - name: Archive experimental binary
