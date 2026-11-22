@@ -206,7 +206,7 @@ jobs:
             -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/libobs" \
             -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
             -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
-            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-macos-universal" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-universal" \
             -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
       - name: Build companion
         run: cmake --build companion/build-macos --config Release --parallel 4
