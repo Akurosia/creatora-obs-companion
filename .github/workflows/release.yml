@@ -255,7 +255,7 @@ jobs:
             librist-dev libsrt-openssl-dev libpci-dev libpipewire-0.3-dev \
             libqrcodegencpp-dev uthash-dev libsimde-dev libspeexdsp-dev \
             qt6-base-dev qt6-base-private-dev qt6-svg-dev qt6-websockets-dev \
-            libsecret-1-dev libpulse-dev libxcb-xinput-dev libdrm-dev libgbm-dev libasound2-dev
+            libsecret-1-dev libpulse-dev libxcb-xinput-dev libdrm-dev libgbm-dev libasound2-dev libv4l-dev
       - name: Verify FFmpeg toolchain
         run: |
           pkg-config --modversion libavcodec
