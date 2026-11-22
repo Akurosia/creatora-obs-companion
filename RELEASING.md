@@ -1,3 +1,30 @@
+# Creatora OBS Companion — release process
+
+## Build matrix
+
+- **Windows x64:** stable GitHub-hosted `windows-2022` build; produces the Windows ZIP and SHA-256 checksum.
+- **macOS x86_64:** experimental GitHub-hosted `macos-15-intel` compile job. Artifacts are for engineering validation only.
+- **Linux x86_64:** experimental GitHub-hosted `ubuntu-24.04` compile job. Artifacts are for engineering validation only.
+
+The experimental jobs use `continue-on-error`; their failures must be fixed before enabling release distribution. In particular, non-Windows credential encryption currently refuses pairing, macOS still needs a validated OBS `.plugin` bundle, and Linux needs a verified OBS-compatible installation layout. **Do not distribute the experimental binaries as working releases.**
+
+## Why a successful build did not publish a release
+
+Commits on `main` only upload workflow artifacts. The GitHub Release step executes only for a pushed `vX.Y.Z` tag matching the CMake project version. Currently CMake declares `0.1.2`. To publish the first Windows release after validating the build:
+
+```bash
+git checkout main
+git pull --ff-only
+git tag v0.1.2
+git push origin v0.1.2
+```
+
+Check **Actions** for the tag build and **Releases** for the resulting ZIP. Never create the GitHub release manually before the workflow runs, because the current `gh release create` step expects to create it itself.
+
+**Private repository note:** Public clients cannot check GitHub releases in a private repository without credentials. To support in-app update checks for external users, configure a separate public releases repository and publish the assets there; do not embed a GitHub token in the plugin.
+
+---
+
 # Releasing Creatora OBS Companion (OBS Studio 33 / Windows x64)
 
 The GitHub Actions workflow runs on **GitHub-hosted `windows-2022` runners**.
