@@ -28,13 +28,13 @@ jobs:
       contents: write
     steps:
       - name: Check out companion
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: companion
           persist-credentials: false
 
       - name: Check out OBS Studio
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: obsproject/obs-studio
           ref: ${{ env.OBS_VERSION }}
@@ -43,7 +43,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -138,7 +138,7 @@ jobs:
             -ObsQtCoreDll "$env:OBS_QT_CORE_DLL"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: creatora-obs-companion-obs33-windows-x64
           path: companion/dist/*
