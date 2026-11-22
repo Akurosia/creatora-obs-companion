@@ -1,5 +1,21 @@
 # Creatora OBS Companion — release process
 
+## Versioning from Git tags
+
+CI uses the pushed `vMAJOR.MINOR.PATCH` Git tag as the **only source of release versions**. It injects `CREATORA_BUILD_VERSION` into the CMake build on Windows, macOS, and Linux. The version embedded in the plugin and Windows ZIP filename therefore matches the tag.
+
+For branch pushes, pull requests, and manual runs without a tag, the version is `0.0.0`. These builds publish Actions artifacts only, not GitHub Releases.
+
+To release any version, first push changes to `main`, then push a new matching tag. **Do not edit `CMakeLists.txt` to change the version.**
+
+```bash
+git checkout main
+git pull --ff-only
+git tag v0.1.3
+git push origin v0.1.3
+```
+
+
 ## Build matrix
 
 - **Windows x64:** stable GitHub-hosted `windows-2022` build; produces the Windows ZIP and SHA-256 checksum.
@@ -50,22 +66,7 @@ permission in its tag-publishing job.
 
 ## How to publish
 
-Update the CMake project version first:
-
-```cmake
-project(creatora-obs-companion VERSION 0.2.0 LANGUAGES CXX)
-```
-
-Then merge/push to `main`, check the Actions build status, and create a matching tag:
-
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
-
-GitHub Actions will create a release named `Creatora OBS Companion v0.2.0`.
-You can also run a manual test build using **Actions → Build and release OBS
-Companion → Run workflow** without publishing a release.
+Follow the tag-only process above. The `Publish GitHub Release` step runs only on tag pushes, after the Windows package is built.
 
 ## Important compatibility and deployment notes
 
