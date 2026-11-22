@@ -70,7 +70,7 @@ jobs:
           # Branch, PR, and manual builds without a tag use 0.0.0.
           $version = '0.0.0'
           if ($env:GITHUB_REF_TYPE -eq 'tag') {
-            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+\.[0-9]+\.[0-9]+)) {
+            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+[.][0-9]+[.][0-9]+)$') {
               throw "Expected release tag vMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
             }
             $version = $Matches[1]
