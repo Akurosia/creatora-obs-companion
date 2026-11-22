@@ -156,3 +156,125 @@ jobs:
           gh release create "$env:GITHUB_REF_NAME" @assets --verify-tag --generate-notes `
             --title "Creatora OBS Companion $env:GITHUB_REF_NAME"
           if ($LASTEXITCODE -ne 0) { throw 'Failed to publish GitHub Release' }
+
+
+  # Experimental platform builds. Not included in stable releases until pairing
+  # credential storage, OBS loading, and package layout are verified on-device.
+  macos:
+    name: macOS x86_64 / OBS 33 (experimental)
+    runs-on: macos-15-intel
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      - name: Install Qt WebSockets
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: qtwebsockets
+          cache: true
+      - name: Configure OBS development libraries
+        working-directory: obs-studio
+        run: |
+          cmake --preset macos -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF "-DQt6_DIR=$QT_ROOT_DIR/lib/cmake/Qt6"
+      - name: Build OBS development libraries
+        working-directory: obs-studio
+        run: cmake --build build_macos --target obs-frontend-api --config Release --parallel 4
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-macos -G Xcode \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+      - name: Build companion
+        run: cmake --build companion/build-macos --config Release --parallel 4
+      - name: Archive experimental binaries
+        run: |
+          mkdir -p companion/dist
+          find companion/build-macos -type f \( -name 'creatora-obs-companion.so' -o -name 'creatora-obs-companion.dylib' \) -exec cp {} companion/dist/ \;
+          test -n "$(find companion/dist -type f)"
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-macos-experimental
+          path: companion/dist/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux x86_64 / OBS 33 (experimental)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build pkg-config build-essential cmake extra-cmake-modules \
+            libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev \
+            libswresample-dev libswscale-dev libx264-dev libcurl4-openssl-dev \
+            libmbedtls-dev libgl1-mesa-dev libjansson-dev libluajit-5.1-dev \
+            python3-dev libx11-dev libxcb-randr0-dev libxcb-shm0-dev \
+            libxcb-xinerama0-dev libxcb-composite0-dev libxcomposite-dev \
+            libxinerama-dev libxcb1-dev libx11-xcb-dev libxcb-xfixes0-dev \
+            libxss-dev libglvnd-dev libgles2-mesa-dev libwayland-dev \
+            librist-dev libsrt-openssl-dev libpci-dev libpipewire-0.3-dev \
+            libqrcodegencpp-dev uthash-dev libsimde-dev libspeexdsp-dev \
+            qt6-base-dev qt6-base-private-dev qt6-svg-dev qt6-websockets-dev \
+            libsecret-1-dev
+      - name: Configure OBS 33 development libraries
+        run: |
+          cmake -S obs-studio -B obs-studio/build_ubuntu -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF \
+            -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF \
+            -DENABLE_WEBRTC=OFF
+      - name: Build OBS development libraries
+        run: cmake --build obs-studio/build_ubuntu --target obs-frontend-api --parallel 4
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-linux -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/frontend/api" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+      - name: Build companion
+        run: cmake --build companion/build-linux --parallel 4
+      - name: Archive experimental binary
+        run: |
+          mkdir -p companion/dist
+          find companion/build-linux -name 'creatora-obs-companion.so' -type f -exec cp {} companion/dist/ \;
+          test -s companion/dist/creatora-obs-companion.so
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-linux-experimental
+          path: companion/dist/*
+          if-no-files-found: error
