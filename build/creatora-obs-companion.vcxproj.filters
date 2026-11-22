@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\mocs_compilation_Debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\src\plugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\src\companion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\mocs_compilation_Release.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\mocs_compilation_MinSizeRel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\mocs_compilation_RelWithDebInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\OBS-Development\creatora_obs_companion\src\companion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\OBS-Development\obs-studio\build_x64\libobs\libobs_EXPORT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\OBS-Development\obs-studio\build_x64\deps\w32-pthreads\w32-pthreads_EXPORT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\OBS-Development\obs-studio\build_x64\frontend\api\obs-frontend-api_EXPORT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\OBS-Development\creatora_obs_companion\build\CMakeFiles\982cc8027f3b4fd9acf60d170b678b69\timestamp_(CONFIG).rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\OBS-Development\creatora_obs_companion\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\timestamp_Debug" />
+    <None Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\timestamp_Release" />
+    <None Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\timestamp_MinSizeRel" />
+    <None Include="C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\timestamp_RelWithDebInfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8F8DBFC7-06AB-3DF5-8EA1-B57972D68292}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{FBB54D3D-7033-3032-9530-0E8746650585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6B85F984-8076-31C5-AFF5-0B751F344EDD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

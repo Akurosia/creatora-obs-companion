@@ -1,0 +1,28 @@
+^C:\OBS-DEVELOPMENT\CREATORA_OBS_COMPANION\BUILD\CMAKEFILES\982CC8027F3B4FD9ACF60D170B678B69\TIMESTAMP_(CONFIG).RULE
+setlocal
+cd C:\OBS-Development\creatora_obs_companion\build
+if %errorlevel% neq 0 goto :cmEnd
+C:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_autogen C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/creatora-obs-companion_autogen.dir/AutogenInfo.json Release
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch C:/OBS-Development/creatora_obs_companion/build/creatora-obs-companion_autogen/timestamp_Release
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E cmake_transform_depfile "Visual Studio 18 2026" MSBuildAdditionalInputs C:/OBS-Development/creatora_obs_companion C:/OBS-Development/creatora_obs_companion C:/OBS-Development/creatora_obs_companion/build C:/OBS-Development/creatora_obs_companion/build C:/OBS-Development/creatora_obs_companion/build/creatora-obs-companion_autogen/deps_Release C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/d/f0f404cb8f0cc3ac54b85ceb323c2d4b0a035f50282b9d875072be3418599556.AdditionalInputs
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\OBS-DEVELOPMENT\CREATORA_OBS_COMPANION\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/OBS-Development/creatora_obs_companion -BC:/OBS-Development/creatora_obs_companion/build --check-stamp-file C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

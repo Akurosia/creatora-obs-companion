@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/OBS-Development/creatora_obs_companion/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

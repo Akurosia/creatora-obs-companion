@@ -1,0 +1,4 @@
+C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/creatora-obs-companion.dir
+C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/INSTALL.dir
+C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/ALL_BUILD.dir
+C:/OBS-Development/creatora_obs_companion/build/CMakeFiles/ZERO_CHECK.dir

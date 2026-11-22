@@ -1,0 +1,3 @@
+set(__QT_DEPLOY_TARGET_creatora-obs-companion_FILE C:/OBS-Development/creatora_obs_companion/build/Debug/creatora-obs-companion.dll)
+set(__QT_DEPLOY_TARGET_creatora-obs-companion_TYPE MODULE_LIBRARY)
+set(__QT_DEPLOY_TARGET_creatora-obs-companion_RUNTIME_DLLS C:/OBS-Development/obs-studio/build_x64/frontend/api/Debug/obs-frontend-api.dll;C:/Qt/6.11.1/msvc2022_64/bin/Qt6Widgetsd.dll;C:/Qt/6.11.1/msvc2022_64/bin/Qt6WebSocketsd.dll;C:/OBS-Development/obs-studio/build_x64/libobs/Debug/obs.dll;C:/OBS-Development/obs-studio/build_x64/deps/w32-pthreads/Debug/w32-pthreads.dll;C:/Qt/6.11.1/msvc2022_64/bin/Qt6Guid.dll;C:/Qt/6.11.1/msvc2022_64/bin/Qt6Networkd.dll;C:/Qt/6.11.1/msvc2022_64/bin/Qt6Cored.dll)

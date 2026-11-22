@@ -1,0 +1,10 @@
+^C:\OBS-DEVELOPMENT\CREATORA_OBS_COMPANION\BUILD\CMAKEFILES\D7CD5F4FFC6F22A6B466B02522BAE3AE\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/OBS-Development/creatora_obs_companion -BC:/OBS-Development/creatora_obs_companion/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/OBS-Development/creatora_obs_companion/build/creatora-obs-companion.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
