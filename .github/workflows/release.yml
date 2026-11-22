@@ -205,7 +205,8 @@ jobs:
           cmake -S companion -B companion/build-macos -G Xcode \
             -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/libobs" \
             -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
-            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-macos-universal" \
             -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
       - name: Build companion
         run: cmake --build companion/build-macos --config Release --parallel 4
@@ -254,7 +255,7 @@ jobs:
             librist-dev libsrt-openssl-dev libpci-dev libpipewire-0.3-dev \
             libqrcodegencpp-dev uthash-dev libsimde-dev libspeexdsp-dev \
             qt6-base-dev qt6-base-private-dev qt6-svg-dev qt6-websockets-dev \
-            libsecret-1-dev
+            libsecret-1-dev libpulse-dev libxcb-xinput-dev
       - name: Verify FFmpeg toolchain
         run: |
           pkg-config --modversion libavcodec
