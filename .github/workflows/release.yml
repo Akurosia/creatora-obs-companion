@@ -70,7 +70,256 @@ jobs:
           # Branch, PR, and manual builds without a tag use 0.0.0.
           $version = '0.0.0'
           if ($env:GITHUB_REF_TYPE -eq 'tag') {
-            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+\\.[0-9]+\\.[0-9]+)$') {
+            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+\.[0-9]+\.[0-9]+)) {
+              throw "Expected release tag vMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
+            }
+            $version = $Matches[1]
+          }
+          if (-not $env:QT_ROOT_DIR) { throw 'Qt installer did not expose QT_ROOT_DIR' }
+          if (-not (Test-Path "$env:QT_ROOT_DIR/lib/cmake/Qt6WebSockets/Qt6WebSocketsConfig.cmake")) {
+            throw 'Qt WebSockets development module was not installed'
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "qt_root=$($env:QT_ROOT_DIR)" >> $env:GITHUB_OUTPUT
+
+      - name: Configure OBS development libraries
+        shell: pwsh
+        working-directory: obs-studio
+        run: |
+          $ErrorActionPreference = 'Stop'
+          # Bootstrap from OBS 33's own CMake presets: downloads its pinned
+          # dependencies instead of assuming they exist on the runner.
+          cmake --preset windows-x64 -G 'Visual Studio 17 2022' -A x64 `
+            -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF -DENABLE_AJA=OFF `
+            -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF `
+            "-DQt6_DIR=$($env:QT_ROOT_DIR.Replace('\','/'))/lib/cmake/Qt6"
+          if ($LASTEXITCODE -ne 0) { throw 'OBS configure failed' }
+
+      - name: Build OBS frontend and libobs development libraries
+        shell: pwsh
+        working-directory: obs-studio
+        run: |
+          cmake --build build_x64 --target obs-frontend-api --config Release --parallel 4
+          if ($LASTEXITCODE -ne 0) { throw 'OBS development library build failed' }
+
+      - name: Build companion against OBS 33
+        shell: pwsh
+        working-directory: companion
+        run: |
+          ./scripts/build-obs33.ps1 `
+            -ObsRoot '${{ github.workspace }}\obs-studio' `
+            -QtRoot '${{ steps.version.outputs.qt_root }}' `
+            -GitHubRepository '${{ github.repository }}' `
+            -Version '${{ steps.version.outputs.version }}' `
+            -SkipLegacyPackage -Clean
+
+      # Check against the real OBS 33 distribution rather than assuming the
+      # downloaded OBS *development* Qt package is the runtime version.
+      - name: Download official OBS runtime for compatibility validation
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force obs-runtime | Out-Null
+          gh release download "$env:OBS_VERSION" --repo obsproject/obs-studio `
+            --pattern "OBS-Studio-$env:OBS_VERSION-Windows-x64.zip" --dir obs-runtime
+          if ($LASTEXITCODE -ne 0) { throw 'Could not download OBS runtime ZIP' }
+          $archive = Get-ChildItem obs-runtime -Filter '*.zip' | Select-Object -First 1
+          if (-not $archive) { throw 'Missing OBS runtime ZIP' }
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath obs-runtime/extracted
+          $core = Get-ChildItem obs-runtime/extracted -Recurse -Filter Qt6Core.dll -File |
+            Where-Object { $_.FullName -match 'bin[\\/]64bit' } | Select-Object -First 1
+          if (-not $core) { throw 'Could not find OBS Qt6Core.dll' }
+          "OBS_QT_CORE_DLL=$($core.FullName)" >> $env:GITHUB_ENV
+
+      - name: Package distribution and SHA-256
+        shell: pwsh
+        working-directory: companion
+        run: |
+          ./scripts/package-release.ps1 `
+            -QtRoot '${{ steps.version.outputs.qt_root }}' `
+            -Version '${{ steps.version.outputs.version }}' `
+            -ObsQtCoreDll "$env:OBS_QT_CORE_DLL"
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-obs33-windows-x64
+          path: companion/dist/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        shell: pwsh
+        working-directory: companion
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $assets = @(Get-ChildItem dist -File | Select-Object -ExpandProperty FullName)
+          if ($assets.Count -ne 2) { throw 'Expected exactly a ZIP and SHA256 file' }
+          gh release create "$env:GITHUB_REF_NAME" @assets --verify-tag --generate-notes `
+            --title "Creatora OBS Companion $env:GITHUB_REF_NAME"
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to publish GitHub Release' }
+
+
+  # Experimental platform builds. Not included in stable releases until pairing
+  # credential storage, OBS loading, and package layout are verified on-device.
+  macos:
+    name: macOS x86_64 / OBS 33 (experimental)
+    runs-on: macos-26-intel
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      - name: Install Qt WebSockets
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: qtwebsockets
+          cache: true
+      - name: Verify macOS SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+          test "$(xcrun --sdk macosx --show-sdk-version | cut -d. -f1)" -ge 26
+      - name: Configure OBS development libraries
+        working-directory: obs-studio
+        run: |
+          cmake --preset macos -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF "-DQt6_DIR=$QT_ROOT_DIR/lib/cmake/Qt6"
+      - name: Build OBS development libraries
+        working-directory: obs-studio
+        run: cmake --build build_macos --target obs-frontend-api --config Release --parallel 4
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-macos -G Xcode \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-universal" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$(if [[ "$GITHUB_REF_TYPE" == tag ]]; then echo "${GITHUB_REF_NAME#v}"; else echo 0.0.0; fi)"
+      - name: Build companion
+        run: cmake --build companion/build-macos --config Release --parallel 4
+      - name: Archive experimental binaries
+        run: |
+          mkdir -p companion/dist
+          find companion/build-macos -type f \( -name 'creatora-obs-companion.so' -o -name 'creatora-obs-companion.dylib' \) -exec cp {} companion/dist/ \;
+          test -n "$(find companion/dist -type f)"
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-macos-experimental
+          path: companion/dist/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux x86_64 / OBS 33 (experimental)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      # OBS 33.0.1's own package manifest is the source of truth:
+      # obs-studio/.github/scripts/utils.zsh/setup_ubuntu
+      # Install its complete apt dependency set instead of adding packages
+      # reactively when CMake reports each missing library.
+      - name: Install OBS 33 upstream build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libglib2.0-dev \
+            extra-cmake-modules lsb-release dh-cmake \
+            libcurl4-openssl-dev \
+            libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev \
+            libswresample-dev libswscale-dev \
+            libjansson-dev \
+            libx11-xcb-dev \
+            libgles2-mesa-dev \
+            libwayland-dev \
+            libpipewire-0.3-dev \
+            libpulse-dev \
+            libx264-dev \
+            libmbedtls-dev \
+            libgl1-mesa-dev \
+            uthash-dev \
+            libsimde-dev \
+            libluajit-5.1-dev python3-dev \
+            libx11-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-xinerama0-dev \
+            libxcb-composite0-dev libxinerama-dev libxcb1-dev libx11-xcb-dev libxcb-xfixes0-dev \
+            swig libcmocka-dev libxss-dev libglvnd-dev \
+            libxkbcommon-dev libatk1.0-dev libatk-bridge2.0-dev libxcomposite-dev libxdamage-dev \
+            libasound2-dev libfdk-aac-dev libfontconfig-dev libfreetype6-dev libjack-jackd2-dev \
+            libsndio-dev libspeexdsp-dev libudev-dev libv4l-dev libva-dev libvlc-dev \
+            libpci-dev libdrm-dev \
+            nlohmann-json3-dev libwebsocketpp-dev libasio-dev libqrcodegencpp-dev \
+            libffmpeg-nvenc-dev librist-dev libsrt-openssl-dev \
+            qt6-base-dev libqt6svg6-dev qt6-base-private-dev \
+            libvpl-dev libvpl2 \
+            libxcb-xinput-dev libgbm-dev libvdpau-dev \
+            qt6-websockets-dev libsecret-1-dev \
+            ninja-build pkg-config cmake
+      - name: Verify FFmpeg toolchain
+        run: |
+          pkg-config --modversion libavcodec
+          test "$(pkg-config --modversion libavcodec | cut -d. -f1)" -ge 62
+      - name: Configure OBS 33 development libraries
+        run: |
+          cmake -S obs-studio -B obs-studio/build_ubuntu -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF \
+            -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF \
+            -DENABLE_WEBRTC=OFF
+      - name: Build OBS development libraries
+        run: cmake --build obs-studio/build_ubuntu --target obs-frontend-api --parallel 4
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-linux -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/frontend/api" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$(if [[ "$GITHUB_REF_TYPE" == tag ]]; then echo "${GITHUB_REF_NAME#v}"; else echo 0.0.0; fi)"
+      - name: Build companion
+        run: cmake --build companion/build-linux --parallel 4
+      - name: Archive experimental binary
+        run: |
+          mkdir -p companion/dist
+          find companion/build-linux -name 'creatora-obs-companion.so' -type f -exec cp {} companion/dist/ \;
+          test -s companion/dist/creatora-obs-companion.so
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-linux-experimental
+          path: companion/dist/*
+          if-no-files-found: error
+) {
               throw "Expected release tag vMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
             }
             $version = $Matches[1]
