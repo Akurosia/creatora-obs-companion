@@ -255,7 +255,7 @@ jobs:
             librist-dev libsrt-openssl-dev libpci-dev libpipewire-0.3-dev \
             libqrcodegencpp-dev uthash-dev libsimde-dev libspeexdsp-dev \
             qt6-base-dev qt6-base-private-dev qt6-svg-dev qt6-websockets-dev \
-            libsecret-1-dev libpulse-dev libxcb-xinput-dev libdrm-dev libgbm-dev
+            libsecret-1-dev libpulse-dev libxcb-xinput-dev libdrm-dev libgbm-dev libasound2-dev
       - name: Verify FFmpeg toolchain
         run: |
           pkg-config --modversion libavcodec
@@ -274,6 +274,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/libobs" \
             -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/frontend/api" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
             -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
       - name: Build companion
         run: cmake --build companion/build-linux --parallel 4
