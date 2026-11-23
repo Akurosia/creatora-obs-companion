@@ -43,6 +43,34 @@ try {
     $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-obs$ObsMajor-win64.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
+    # Validate the ZIP entries, not just the staging directory. Prevent nested bin
+    # folders, extra files, and accidental changes to the OBS-specific layout.
+    Add-Type -AssemblyName System.IO.Compression
+    if ($ObsMajor -eq 33) {
+        $expectedPaths = @(
+            'plugins/creatora-obs-companion/creatora-obs-companion.dll',
+            'plugins/creatora-obs-companion/Qt6WebSockets.dll'
+        )
+    } else {
+        $expectedPaths = @(
+            'obs-plugins/64bit/creatora-obs-companion.dll',
+            'obs-plugins/64bit/Qt6WebSockets.dll'
+        )
+    }
+    $archive = [System.IO.Compression.ZipFile]::OpenRead($zip)
+    try {
+        $actualPaths = @($archive.Entries |
+            Where-Object { $_.Name -ne '' } |
+            ForEach-Object { $_.FullName.Replace('\', '/') } |
+            Sort-Object)
+        $wantedPaths = @($expectedPaths | Sort-Object)
+        if (($actualPaths -join '|') -ne ($wantedPaths -join '|')) {
+            throw "Invalid OBS $ObsMajor archive layout. Expected: $($wantedPaths -join ', '); got: $($actualPaths -join ', ')"
+        }
+        Write-Host "Validated OBS $ObsMajor ZIP: $($actualPaths -join ', ')"
+    } finally {
+        $archive.Dispose()
+    }
     $sha = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
     "$sha  $([IO.Path]::GetFileName($zip))" | Set-Content -LiteralPath "$zip.sha256" -Encoding ascii
     Write-Host "Release package: $zip"
