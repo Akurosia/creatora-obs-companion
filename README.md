@@ -68,3 +68,26 @@ If no tag is available, the version falls back to `0.0.0` with a warning.
 To build using the existing OBS 33 script for OBS 32 directly, pass
 `-ObsMajor 32`. The OBS development tree must match the selected major.
 CI publishes separate OBS 32 and OBS 33 Windows archives.
+
+
+## Windows ZIP layouts
+
+The local build scripts, standalone OBS 33 packager, and CI release packager
+produce the same two-DLL layouts. ZIPs have no extra root folder, install
+file, nested bin directory, or TLS folder.
+
+OBS 33:
+```text
+plugins/
+└── creatora-obs-companion/
+    ├── creatora-obs-companion.dll
+    └── Qt6WebSockets.dll
+```
+
+OBS 32:
+```text
+obs-plugins/
+└── 64bit/
+    ├── creatora-obs-companion.dll
+    └── Qt6WebSockets.dll
+```
