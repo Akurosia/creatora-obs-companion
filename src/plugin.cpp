@@ -3,6 +3,8 @@
 #include <obs-frontend-api.h>
 #include <QApplication>
 #include <QFileInfo>
+#include <QVersionNumber>
+#include <QtGlobal>
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("creatora-obs-companion", "en-US")
@@ -12,13 +14,18 @@ static CreatoraCompanion *companion = nullptr;
 
 bool obs_module_load(void)
 {
-    if (!QApplication::instance()) return false;
+    blog(LOG_INFO, "[Creatora] Loading companion: compiled Qt %s, runtime Qt %s", QT_VERSION_STR, qVersion());
+    if (!QApplication::instance()) {
+        blog(LOG_ERROR, "[Creatora] Could not initialize: QApplication instance not available");
+        return false;
+    }
     QApplication::addLibraryPath(QFileInfo(QString::fromUtf8(
         obs_get_module_binary_path(obs_current_module()))).absolutePath());
     companion = new CreatoraCompanion;
     if (!obs_frontend_add_dock_by_id("creatora-companion-dock", "Creatora Companion", companion)) {
         delete companion;
         companion = nullptr;
+        blog(LOG_ERROR, "[Creatora] Failed to register dock creatora-companion-dock (duplicate dock ID or unsupported frontend)");
         return false;
     }
     blog(LOG_INFO, "[Creatora] Companion loaded (manual connection default)");

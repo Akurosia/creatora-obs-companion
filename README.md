@@ -69,6 +69,18 @@ To build using the existing OBS 33 script for OBS 32 directly, pass
 `-ObsMajor 32`. The OBS development tree must match the selected major.
 CI publishes separate OBS 32 and OBS 33 Windows archives.
 
+## OBS 32.1.x compatibility
+
+The OBS 32 Windows CI build targets OBS **32.1.2** and its matching Qt runtime.
+OBS 32.2.x is a separate runtime target and is not guaranteed compatible with
+this 32.1.x build. OBS logs now print compiled/runtime Qt versions and an
+explicit reason when the plugin's dock initialization fails.
+
+If OBS prints only `Module '../../obs-plugins/64bit/creatora-obs-companion.dll' not loaded`,
+check dependencies using `dumpbin /dependents creatora-obs-companion.dll`
+from a Visual Studio developer command prompt. Windows may be unable to find
+Qt6WebSockets or a required Qt entry point, and an OBS module-load failure alone
+does not identify the exact error.
 
 ## Windows ZIP layouts
 
