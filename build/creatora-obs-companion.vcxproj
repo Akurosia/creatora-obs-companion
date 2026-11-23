@@ -107,12 +107,12 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CREATORA_PLUGIN_VERSION="0.1.2";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="Debug";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CREATORA_PLUGIN_VERSION="0.0.0";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="Debug";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CREATORA_PLUGIN_VERSION=\"0.1.2\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"Debug\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CREATORA_PLUGIN_VERSION=\"0.0.0\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"Debug\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\include_Debug;C:\OBS-Development\obs-studio\build_x64\config;C:\OBS-Development\obs-studio\libobs;C:\OBS-Development\obs-studio\.deps\obs-deps-2026-10-23-x64\include;C:\OBS-Development\obs-studio\deps\w32-pthreads;C:\OBS-Development\obs-studio\frontend\api;C:\Qt\6.11.1\msvc2022_64\include\QtCore;C:\Qt\6.11.1\msvc2022_64\include;C:\Qt\6.11.1\msvc2022_64\mkspecs\win32-msvc;C:\Qt\6.11.1\msvc2022_64\include\QtWidgets;C:\Qt\6.11.1\msvc2022_64\include\QtGui;C:\Qt\6.11.1\msvc2022_64\include\QtNetwork;C:\Qt\6.11.1\msvc2022_64\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -163,14 +163,14 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.1.2";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="Release";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.0.0";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="Release";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.1.2\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"Release\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.0.0\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"Release\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\include_Release;C:\OBS-Development\obs-studio\build_x64\config;C:\OBS-Development\obs-studio\libobs;C:\OBS-Development\obs-studio\.deps\obs-deps-2026-10-23-x64\include;C:\OBS-Development\obs-studio\deps\w32-pthreads;C:\OBS-Development\obs-studio\frontend\api;C:\Qt\6.11.1\msvc2022_64\include\QtCore;C:\Qt\6.11.1\msvc2022_64\include;C:\Qt\6.11.1\msvc2022_64\mkspecs\win32-msvc;C:\Qt\6.11.1\msvc2022_64\include\QtWidgets;C:\Qt\6.11.1\msvc2022_64\include\QtGui;C:\Qt\6.11.1\msvc2022_64\include\QtNetwork;C:\Qt\6.11.1\msvc2022_64\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -221,14 +221,14 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.1.2";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="MinSizeRel";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.0.0";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="MinSizeRel";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.1.2\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"MinSizeRel\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.0.0\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"MinSizeRel\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\include_MinSizeRel;C:\OBS-Development\obs-studio\build_x64\config;C:\OBS-Development\obs-studio\libobs;C:\OBS-Development\obs-studio\.deps\obs-deps-2026-10-23-x64\include;C:\OBS-Development\obs-studio\deps\w32-pthreads;C:\OBS-Development\obs-studio\frontend\api;C:\Qt\6.11.1\msvc2022_64\include\QtCore;C:\Qt\6.11.1\msvc2022_64\include;C:\Qt\6.11.1\msvc2022_64\mkspecs\win32-msvc;C:\Qt\6.11.1\msvc2022_64\include\QtWidgets;C:\Qt\6.11.1\msvc2022_64\include\QtGui;C:\Qt\6.11.1\msvc2022_64\include\QtNetwork;C:\Qt\6.11.1\msvc2022_64\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
@@ -280,12 +280,12 @@
       <SupportJustMyCode></SupportJustMyCode>
       <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
       <UseFullPaths>false</UseFullPaths>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.1.2";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="RelWithDebInfo";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION="0.0.0";CREATORA_RELEASE_REPOSITORY="";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR="RelWithDebInfo";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.1.2\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"RelWithDebInfo\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CREATORA_PLUGIN_VERSION=\"0.0.0\";CREATORA_RELEASE_REPOSITORY=\"\";ENABLE_HEVC;HAVE_OBSCONFIG_H;QT_CORE_LIB;QT_NO_DEBUG;_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN64;_WIN64;UNICODE;_UNICODE;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_WEBSOCKETS_LIB;CMAKE_INTDIR=\"RelWithDebInfo\";creatora_obs_companion_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:\OBS-Development\creatora_obs_companion\build\creatora-obs-companion_autogen\include_RelWithDebInfo;C:\OBS-Development\obs-studio\build_x64\config;C:\OBS-Development\obs-studio\libobs;C:\OBS-Development\obs-studio\.deps\obs-deps-2026-10-23-x64\include;C:\OBS-Development\obs-studio\deps\w32-pthreads;C:\OBS-Development\obs-studio\frontend\api;C:\Qt\6.11.1\msvc2022_64\include\QtCore;C:\Qt\6.11.1\msvc2022_64\include;C:\Qt\6.11.1\msvc2022_64\mkspecs\win32-msvc;C:\Qt\6.11.1\msvc2022_64\include\QtWidgets;C:\Qt\6.11.1\msvc2022_64\include\QtGui;C:\Qt\6.11.1\msvc2022_64\include\QtNetwork;C:\Qt\6.11.1\msvc2022_64\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>

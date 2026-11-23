@@ -88,9 +88,9 @@ In **Mein Konto → OBS Companion** add input for the code and a list of paired 
 - Protect against connection hijacking and duplicated devices: replace or reject old socket on concurrent connection; monitor audit events.
 - Plugin sends after connection:
 ```json
-{"type":"hello","protocol":1,"device_id":"uuid","capabilities":["scene.switch","sceneitem.visibility","input.mute"]}
+{"type":"hello","protocol":1,"device_id":"uuid","capabilities":["scene.switch","sceneitem.visibility","input.mute","source.screenshot"],"inventory":{"scenes":["BRB","Gameplay"],"sources":["Alerts","Webcam"],"inputs":["Desktop Audio","Mic/Aux"]}}
 ```
-- Server validates protocol, device_id and expected capabilities; no commands until hello is accepted.
+- Server validates protocol, device_id, expected capabilities and the bounded OBS inventory; no commands until hello is accepted. The dashboard uses the inventory for alphabetically sorted selectors.
 
 ### 6. Command envelopes, validation, and receipts
 

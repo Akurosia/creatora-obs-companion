@@ -13,6 +13,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QStringList>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -50,6 +51,40 @@ constexpr int kMaxScreenshotBytes = 2000000;
 #ifndef CREATORA_PLUGIN_VERSION
 #define CREATORA_PLUGIN_VERSION "0.0.0"
 #endif
+
+QJsonArray jsonNames(QStringList names)
+{
+    std::sort(names.begin(), names.end(), [](const QString &left, const QString &right) {
+        return left.compare(right, Qt::CaseInsensitive) < 0;
+    });
+    names.removeDuplicates();
+    QJsonArray result;
+    for (const auto &name : names) result.append(name);
+    return result;
+}
+
+QJsonObject obsInventory()
+{
+    QStringList scenes, sources, inputs;
+    obs_frontend_source_list sceneList{};
+    obs_frontend_get_scenes(&sceneList);
+    for (size_t index = 0; index < sceneList.sources.num; ++index) {
+        const char *name = obs_source_get_name(sceneList.sources.array[index]);
+        if (name && *name) scenes.append(QString::fromUtf8(name));
+    }
+    obs_frontend_source_list_free(&sceneList);
+    struct InventoryLists { QStringList *sources; QStringList *inputs; } lists{&sources, &inputs};
+    obs_enum_sources([](void *data, obs_source_t *source) {
+        auto *inventory = static_cast<InventoryLists *>(data);
+        const char *name = obs_source_get_name(source);
+        if (!name || !*name || obs_source_get_type(source) == OBS_SOURCE_TYPE_SCENE) return true;
+        inventory->sources->append(QString::fromUtf8(name));
+        if (obs_source_get_output_flags(source) & OBS_SOURCE_AUDIO)
+            inventory->inputs->append(QString::fromUtf8(name));
+        return true;
+    }, &lists);
+    return {{"scenes", jsonNames(scenes)}, {"sources", jsonNames(sources)}, {"inputs", jsonNames(inputs)}};
+}
 #ifndef CREATORA_RELEASE_REPOSITORY
 #define CREATORA_RELEASE_REPOSITORY ""
 #endif
@@ -305,7 +340,8 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         tokenRefresh_.start();
         setStatus("Connected (remote control enabled)");
         QJsonObject hello{{"type", "hello"}, {"protocol", 1}, {"device_id", deviceId_},
-                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute", "source.screenshot"}}};
+                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute", "source.screenshot"}},
+                          {"inventory", obsInventory()}};
         socket_.sendTextMessage(QString::fromUtf8(QJsonDocument(hello).toJson(QJsonDocument::Compact)));
     });
     connect(&socket_, &QWebSocket::disconnected, this, [this] {
