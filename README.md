@@ -1,6 +1,6 @@
 > **CI / releases / update notices:** See [RELEASING.md](RELEASING.md). GitHub tags publish versioned Windows x64 ZIPs via a preconfigured OBS 33 Windows runner; the OBS dock checks public GitHub Releases for newer versions (manual install only).
 
-# Creatora OBS Companion — OBS Studio 33 (Windows x64)
+# Creatora OBS Companion — OBS Studio 32 and 33 (Windows x64)
 
 Native source plugin. The server API is specified separately in `docs/CODEX_SERVER_IMPLEMENTATION.md`; it must be implemented before pairing works.
 
@@ -47,3 +47,24 @@ By default the plugin connects **manually**. Enabling *Connect automatically whe
 ## Status
 
 This is **source code, not a verified OBS 33 binary**. It was not compiled against OBS 33 here because the Windows OBS/Qt development toolchain is unavailable in this environment. Runtime compatibility, secure pairing, and command execution require integration testing with your actual Creatora server and OBS 33.
+
+
+## Local builds for OBS 32 and OBS 33
+
+Build against a separately prepared OBS source/development tree for the target release.
+Each target uses a separate CMake build directory and ZIP name.
+
+```powershell
+.\scripts\build-obs32.ps1 -ObsRoot 'C:\OBS-Development\obs-studio-32' -Clean
+.\scripts\build-obs33.ps1 -ObsRoot 'C:\OBS-Development\obs-studio-33' -Clean
+```
+
+The scripts use `Akurosia/creatora-obs-companion` as the release repository and
+derive the plugin version from the most recent reachable `vMAJOR.MINOR.PATCH`
+Git tag. Run `git fetch --tags` after cloning if needed, or pass
+`-Version '1.2.3'` and `-GitHubRepository 'owner/repo'` explicitly.
+If no tag is available, the version falls back to `0.0.0` with a warning.
+
+To build using the existing OBS 33 script for OBS 32 directly, pass
+`-ObsMajor 32`. The OBS development tree must match the selected major.
+CI publishes separate OBS 32 and OBS 33 Windows archives.

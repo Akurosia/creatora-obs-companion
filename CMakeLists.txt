@@ -15,7 +15,12 @@ set(CMAKE_AUTOMOC ON)
 # Use an actual OBS *development* installation, not the OBS runtime directory.
 # OBS_SDK_ROOT may be a prefix containing lib/cmake/libobs, or a parent
 # directory containing OBS build/install exports.
-set(OBS_SDK_ROOT "" CACHE PATH "OBS 33 SDK installation/build root (containing libobsConfig.cmake)")
+set(CREATORA_OBS_MAJOR "33" CACHE STRING "Target OBS Studio major release (32 or 33)")
+set_property(CACHE CREATORA_OBS_MAJOR PROPERTY STRINGS 32 33)
+if(NOT CREATORA_OBS_MAJOR MATCHES "^(32|33)$")
+  message(FATAL_ERROR "CREATORA_OBS_MAJOR must be 32 or 33")
+endif()
+set(OBS_SDK_ROOT "" CACHE PATH "OBS SDK installation/build root (containing libobsConfig.cmake)")
 if(OBS_SDK_ROOT)
   file(GLOB_RECURSE _obs_configs LIST_DIRECTORIES FALSE
        "${OBS_SDK_ROOT}/*libobsConfig.cmake"
@@ -44,7 +49,7 @@ find_package(libobs CONFIG QUIET)
 if(NOT libobs_FOUND)
   message(FATAL_ERROR
     "OBS development libraries are missing. The OBS app folder is not an SDK. "
-    "Build/install the OBS 33 development libraries or use the official "
+    "Build/install the OBS 32 or 33 development libraries or use the official "
     "obs-plugintemplate dependency bootstrap, then pass "
     "-DOBS_SDK_ROOT=C:/your/real/obs-sdk OR -Dlibobs_DIR=... . "
     "Do not use C:/path/to/obs-and-qt-sdk (that was only a placeholder).")
@@ -54,13 +59,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network WebSockets)
 
 # Fail explicitly when a different major OBS SDK is supplied.
 if(DEFINED libobs_VERSION AND NOT "${libobs_VERSION}" STREQUAL "")
-  if(NOT libobs_VERSION VERSION_GREATER_EQUAL "33.0.0" OR
-     libobs_VERSION VERSION_GREATER_EQUAL "34.0.0")
-    message(FATAL_ERROR "Creatora OBS Companion targets OBS 33.x; found libobs ${libobs_VERSION}")
+  if(NOT libobs_VERSION VERSION_GREATER_EQUAL "${CREATORA_OBS_MAJOR}.0.0" OR
+     NOT libobs_VERSION VERSION_LESS "${CREATORA_OBS_MAJOR}.999.999")
+    message(FATAL_ERROR "Creatora OBS Companion targets OBS ${CREATORA_OBS_MAJOR}.x; found libobs ${libobs_VERSION}")
   endif()
   message(STATUS "Building Creatora against OBS libobs ${libobs_VERSION}")
 else()
-  message(WARNING "libobs package did not expose a version. Ensure this SDK is from OBS 33.x.")
+  message(WARNING "libobs package did not expose a version. Ensure this SDK is from OBS ${CREATORA_OBS_MAJOR}.x.")
 endif()
 
 add_library(creatora-obs-companion MODULE
@@ -77,11 +82,7 @@ target_link_libraries(creatora-obs-companion PRIVATE
   Qt6::Core Qt6::Widgets Qt6::Network Qt6::WebSockets
 )
 if(WIN32)
-  target_compile_definitions(creatora-obs-companion PRIVATE
-  CREATORA_PLUGIN_VERSION="${PROJECT_VERSION}"
-  CREATORA_RELEASE_REPOSITORY="${CREATORA_GITHUB_REPOSITORY}"
-)
-target_link_libraries(creatora-obs-companion PRIVATE Crypt32)
+  target_link_libraries(creatora-obs-companion PRIVATE Crypt32)
 endif()
 set_target_properties(creatora-obs-companion PROPERTIES
   PREFIX ""

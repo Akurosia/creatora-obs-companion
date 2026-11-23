@@ -1,15 +1,17 @@
-# Build Creatora OBS Companion against the existing OBS Studio 33.0.1 build.
+# Build Creatora OBS Companion against an existing OBS Studio 32 or 33 development build.
 # Run from any directory: .\scripts\build-obs33.ps1
 [CmdletBinding()]
 param(
     [string]$ObsRoot = 'C:\OBS-Development\obs-studio',
+    [ValidateSet(32, 33)]
+    [int]$ObsMajor = 33,
     [string]$QtRoot = 'C:\Qt\6.11.1\msvc2022_64',
     [string]$BuildDir = '',
     [ValidateSet('Release', 'RelWithDebInfo', 'Debug')]
     [string]$Configuration = 'Release',
     [int]$Parallel = 4,
     [string]$GitHubRepository = '',
-    [string]$Version = '0.0.0',
+    [string]$Version = '',
     [switch]$SkipLegacyPackage,
     [switch]$Clean
 )
@@ -17,8 +19,29 @@ param(
 $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if ([string]::IsNullOrWhiteSpace($BuildDir)) {
-    $BuildDir = Join-Path $projectRoot 'build'
+    $BuildDir = Join-Path $projectRoot "build-obs$ObsMajor"
 }
+
+if ([string]::IsNullOrWhiteSpace($GitHubRepository)) {
+    $GitHubRepository = 'Akurosia/creatora-obs-companion'
+}
+if ($GitHubRepository -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$') {
+    throw "Invalid GitHub repository: $GitHubRepository (expected owner/repo)"
+}
+if ([string]::IsNullOrWhiteSpace($Version)) {
+    $Version = '0.0.0'
+    if (Get-Command git -ErrorAction SilentlyContinue) {
+        $tag = (& git -C $projectRoot describe --tags --abbrev=0 --match 'v[0-9]*' 2>$null)
+        if ($LASTEXITCODE -eq 0 -and $tag -match '^v(\d+\.\d+\.\d+)$') {
+            $Version = $Matches[1]
+        }
+    }
+    if ($Version -eq '0.0.0') {
+        Write-Warning 'No reachable vMAJOR.MINOR.PATCH git tag found; using version 0.0.0. Pass -Version explicitly or fetch tags.'
+    }
+}
+if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must be MAJOR.MINOR.PATCH' }
+Write-Host "Building for OBS $ObsMajor; plugin version $Version; releases: $GitHubRepository"
 
 $obsBuild = Join-Path $ObsRoot 'build_x64'
 # Resolve dependency version from the OBS checkout, not a hardcoded local date.
@@ -70,9 +93,10 @@ $argsConfigure = @(
     "-DCMAKE_PREFIX_PATH=$prefix",
     "-DQt6_DIR=$($qtConfigDir.Replace('\','/'))",
     "-DCREATORA_GITHUB_REPOSITORY=$GitHubRepository",
-    "-DCREATORA_BUILD_VERSION=$Version"
+    "-DCREATORA_BUILD_VERSION=$Version",
+    "-DCREATORA_OBS_MAJOR=$ObsMajor"
 )
-Write-Host 'Configuring Creatora OBS Companion for OBS Studio 33.0.1...'
+Write-Host "Configuring Creatora OBS Companion for OBS Studio $ObsMajor..."
 & cmake @argsConfigure
 if ($LASTEXITCODE -ne 0) { throw "CMake configure failed (exit $LASTEXITCODE)." }
 
@@ -98,8 +122,8 @@ foreach ($file in @($pluginDll, $webSocketsDll)) {
 }
 
 # This check is advisory: the installed OBS runtime might differ from the OBS build dependency.
-$obsQtCore = Join-Path $ObsRoot '.deps\obs-deps-qt6-2026-10-23-x64\bin\Qt6Core.dll'
-if (Test-Path -LiteralPath $obsQtCore -PathType Leaf) {
+$obsQtCore = Get-ChildItem -LiteralPath (Join-Path $ObsRoot '.deps') -Directory -Filter 'obs-deps-qt6-*-x64' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { Join-Path $_.FullName 'bin\Qt6Core.dll' } | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+if ($obsQtCore -and (Test-Path -LiteralPath $obsQtCore -PathType Leaf)) {
     $coreVersion = (Get-Item -LiteralPath $obsQtCore).VersionInfo.ProductVersion
     $wsVersion = (Get-Item -LiteralPath $webSocketsDll).VersionInfo.ProductVersion
     $coreMM = [regex]::Match($coreVersion, '^\d+\.\d+')
@@ -109,15 +133,15 @@ if (Test-Path -LiteralPath $obsQtCore -PathType Leaf) {
     }
 }
 
-$outputZip = Join-Path $projectRoot 'creatora-obs-companion-obs33-win64.zip'
+$outputZip = Join-Path $projectRoot "creatora-obs-companion-obs$ObsMajor-win64.zip"
 $staging = Join-Path ([System.IO.Path]::GetTempPath()) ('creatora-obs-package-' + [guid]::NewGuid().ToString('N'))
 try {
     $packageDir = Join-Path $staging 'creatora-obs-companion'
     New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
     Copy-Item -LiteralPath $pluginDll -Destination (Join-Path $packageDir 'creatora-obs-companion.dll')
     Copy-Item -LiteralPath $webSocketsDll -Destination (Join-Path $packageDir 'Qt6WebSockets.dll')
-    @'
-Creatora OBS Companion - OBS Studio 33 / Windows x64
+    @"
+Creatora OBS Companion - OBS Studio $ObsMajor / Windows x64
 
 Close OBS Studio and extract the creatora-obs-companion folder into:
 %APPDATA%\obs-studio\plugins\
@@ -129,7 +153,7 @@ Expected file locations:
 No installation script is required. Do not copy Qt6Core.dll into OBS.
 Verify the plugin loads in Help > Log Files > View Current Log.
 The plugin requires the matching Creatora server endpoints.
-'@ | Set-Content -LiteralPath (Join-Path $packageDir 'INSTALL.txt') -Encoding UTF8
+"@ | Set-Content -LiteralPath (Join-Path $packageDir 'INSTALL.txt') -Encoding UTF8
 
     $fileCount = @(Get-ChildItem -LiteralPath $packageDir -File -Recurse).Count
     if ($fileCount -ne 3) { throw "Unexpected package contents: expected 3 files, got $fileCount" }
