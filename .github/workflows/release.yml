@@ -152,11 +152,228 @@ jobs:
           $plugin = "build-obs${{ matrix.obs_major }}/Release/creatora-obs-companion.dll"
           $qtWs = Join-Path $env:QT_ROOT_DIR 'bin/Qt6WebSockets.dll'
           Write-Host "OBS ${{ matrix.obs_version }} target; Qt ${{ steps.runtime.outputs.qt_version }}"
+          # PowerShell on windows-2022 does not automatically have the MSVC
+          # developer environment, so dumpbin.exe is not on PATH.
+          $vswhere = "${env:ProgramFiles(x86)}\\Microsoft Visual Studio\\Installer\\vswhere.exe"
+          if (-not (Test-Path -LiteralPath $vswhere)) { throw "vswhere.exe not found: $vswhere" }
+          $vsRoot = (& $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath)
+          if ($LASTEXITCODE -ne 0 -or -not $vsRoot) { throw 'Visual Studio C++ toolchain not found' }
+          $dumpbin = Get-ChildItem -Path (Join-Path $vsRoot 'VC\\Tools\\MSVC') -Filter dumpbin.exe -File -Recurse |
+            Where-Object { $_.FullName -match '[\\/]bin[\\/]Hostx64[\\/]x64[\\/]dumpbin.exe
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-obs${{ matrix.obs_major }}-windows-x64
+          path: companion/dist/*
+          if-no-files-found: error
+
+  publish:
+    name: Publish Windows x64 releases
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: windows-x64
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download both OBS release archives
+        uses: actions/download-artifact@v7
+        with:
+          pattern: creatora-obs-companion-obs*-windows-x64
+          merge-multiple: true
+          path: dist
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 4
+          gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes \
+            --title "Creatora OBS Companion $GITHUB_REF_NAME"
+
+
+  # Experimental platform builds. Not included in stable releases until pairing
+  # credential storage, OBS loading, and package layout are verified on-device.
+  macos:
+    name: macOS x86_64 / OBS 33 (experimental)
+    runs-on: macos-26-intel
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      - name: Install Qt WebSockets
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: qtwebsockets
+          cache: true
+      - name: Verify macOS SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk macosx --show-sdk-version
+          test "$(xcrun --sdk macosx --show-sdk-version | cut -d. -f1)" -ge 26
+      - name: Configure OBS development libraries
+        working-directory: obs-studio
+        run: |
+          cmake --preset macos -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF "-DQt6_DIR=$QT_ROOT_DIR/lib/cmake/Qt6"
+      - name: Build OBS development libraries
+        working-directory: obs-studio
+        run: cmake --build build_macos --target obs-frontend-api --config Release --parallel 4
+      - name: Resolve plugin version
+        run: |
+          version=0.0.0
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            [[ "$version" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ ]] || exit 1
+          fi
+          echo "CREATORA_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-macos -G Xcode \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_macos/frontend/api" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$GITHUB_WORKSPACE/obs-studio/.deps/obs-deps-2026-10-23-universal" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$CREATORA_BUILD_VERSION"
+      - name: Build companion
+        run: cmake --build companion/build-macos --config Release --parallel 4
+      - name: Archive experimental binaries
+        run: |
+          mkdir -p companion/dist
+          find companion/build-macos -type f \( -name 'creatora-obs-companion.so' -o -name 'creatora-obs-companion.dylib' \) -exec cp {} companion/dist/ \;
+          test -n "$(find companion/dist -type f)"
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-macos-experimental
+          path: companion/dist/*
+          if-no-files-found: error
+
+  linux:
+    name: Linux x86_64 / OBS 33 (experimental)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 120
+    continue-on-error: true
+    steps:
+      - name: Checkout companion
+        uses: actions/checkout@v6
+        with:
+          path: companion
+          persist-credentials: false
+      - name: Checkout OBS Studio
+        uses: actions/checkout@v6
+        with:
+          repository: obsproject/obs-studio
+          ref: ${{ env.OBS_VERSION }}
+          path: obs-studio
+          submodules: recursive
+          persist-credentials: false
+      # OBS 33.0.1's own package manifest is the source of truth:
+      # obs-studio/.github/scripts/utils.zsh/setup_ubuntu
+      # Install its complete apt dependency set instead of adding packages
+      # reactively when CMake reports each missing library.
+      - name: Install OBS 33 upstream build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential libglib2.0-dev \
+            extra-cmake-modules lsb-release dh-cmake \
+            libcurl4-openssl-dev \
+            libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev \
+            libswresample-dev libswscale-dev \
+            libjansson-dev \
+            libx11-xcb-dev \
+            libgles2-mesa-dev \
+            libwayland-dev \
+            libpipewire-0.3-dev \
+            libpulse-dev \
+            libx264-dev \
+            libmbedtls-dev \
+            libgl1-mesa-dev \
+            uthash-dev \
+            libsimde-dev \
+            libluajit-5.1-dev python3-dev \
+            libx11-dev libxcb-randr0-dev libxcb-shm0-dev libxcb-xinerama0-dev \
+            libxcb-composite0-dev libxinerama-dev libxcb1-dev libx11-xcb-dev libxcb-xfixes0-dev \
+            swig libcmocka-dev libxss-dev libglvnd-dev \
+            libxkbcommon-dev libatk1.0-dev libatk-bridge2.0-dev libxcomposite-dev libxdamage-dev \
+            libasound2-dev libfdk-aac-dev libfontconfig-dev libfreetype6-dev libjack-jackd2-dev \
+            libsndio-dev libspeexdsp-dev libudev-dev libv4l-dev libva-dev libvlc-dev \
+            libpci-dev libdrm-dev \
+            nlohmann-json3-dev libwebsocketpp-dev libasio-dev libqrcodegencpp-dev \
+            libffmpeg-nvenc-dev librist-dev libsrt-openssl-dev \
+            qt6-base-dev libqt6svg6-dev qt6-base-private-dev \
+            libvpl-dev libvpl2 \
+            libxcb-xinput-dev libgbm-dev libvdpau-dev \
+            qt6-websockets-dev libsecret-1-dev \
+            ninja-build pkg-config cmake
+      - name: Verify FFmpeg toolchain
+        run: |
+          pkg-config --modversion libavcodec
+          test "$(pkg-config --modversion libavcodec | cut -d. -f1)" -ge 62
+      - name: Configure OBS 33 development libraries
+        run: |
+          cmake -S obs-studio -B obs-studio/build_ubuntu -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DENABLE_BROWSER=OFF -DENABLE_VLC=OFF \
+            -DENABLE_AJA=OFF -DENABLE_SCRIPTING=OFF -DENABLE_VIRTUALCAM=OFF \
+            -DENABLE_WEBRTC=OFF
+      - name: Build OBS development libraries
+        run: cmake --build obs-studio/build_ubuntu --target obs-frontend-api --parallel 4
+      - name: Resolve plugin version
+        run: |
+          version=0.0.0
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            version="${GITHUB_REF_NAME#v}"
+            [[ "$version" =~ ^[0-9]+[.][0-9]+[.][0-9]+$ ]] || exit 1
+          fi
+          echo "CREATORA_BUILD_VERSION=$version" >> "$GITHUB_ENV"
+      - name: Configure companion
+        run: |
+          cmake -S companion -B companion/build-linux -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -Dlibobs_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/libobs" \
+            -Dobs-frontend-api_DIR="$GITHUB_WORKSPACE/obs-studio/build_ubuntu/frontend/api" \
+            -DCMAKE_MODULE_PATH="$GITHUB_WORKSPACE/obs-studio/cmake/finders" \
+            -DCREATORA_GITHUB_REPOSITORY="$GITHUB_REPOSITORY" \
+            -DCREATORA_BUILD_VERSION="$CREATORA_BUILD_VERSION"
+      - name: Build companion
+        run: cmake --build companion/build-linux --parallel 4
+      - name: Archive experimental binary
+        run: |
+          mkdir -p companion/dist
+          find companion/build-linux -name 'creatora-obs-companion.so' -type f -exec cp {} companion/dist/ \;
+          test -s companion/dist/creatora-obs-companion.so
+      - name: Upload experimental artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: creatora-obs-companion-linux-experimental
+          path: companion/dist/*
+          if-no-files-found: error
+ } |
+            Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $dumpbin) { throw "dumpbin.exe not found in $vsRoot" }
+          Write-Host "Using dumpbin: $dumpbin"
           Write-Host "Plugin dependencies:"
-          dumpbin /dependents $plugin
+          & $dumpbin /dependents $plugin
           if ($LASTEXITCODE -ne 0) { throw 'DLL dependency inspection failed' }
           Write-Host "Qt WebSockets dependencies:"
-          dumpbin /dependents $qtWs
+          & $dumpbin /dependents $qtWs
           if ($LASTEXITCODE -ne 0) { throw 'Qt WebSockets dependency inspection failed' }
 
       - name: Upload build artifacts
