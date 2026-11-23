@@ -136,32 +136,22 @@ if ($obsQtCore -and (Test-Path -LiteralPath $obsQtCore -PathType Leaf)) {
 $outputZip = Join-Path $projectRoot "creatora-obs-companion-obs$ObsMajor-win64.zip"
 $staging = Join-Path ([System.IO.Path]::GetTempPath()) ('creatora-obs-package-' + [guid]::NewGuid().ToString('N'))
 try {
-    $packageDir = Join-Path $staging 'creatora-obs-companion'
+    if ($ObsMajor -eq 33) {
+        $packageDir = Join-Path $staging 'plugins\creatora-obs-companion'
+    } else {
+        $packageDir = Join-Path $staging 'obs-plugins\64bit'
+    }
     New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
     Copy-Item -LiteralPath $pluginDll -Destination (Join-Path $packageDir 'creatora-obs-companion.dll')
     Copy-Item -LiteralPath $webSocketsDll -Destination (Join-Path $packageDir 'Qt6WebSockets.dll')
-    @"
-Creatora OBS Companion - OBS Studio $ObsMajor / Windows x64
 
-Close OBS Studio and extract the creatora-obs-companion folder into:
-%APPDATA%\obs-studio\plugins\
-
-Expected file locations:
-%APPDATA%\obs-studio\plugins\creatora-obs-companion\creatora-obs-companion.dll
-%APPDATA%\obs-studio\plugins\creatora-obs-companion\Qt6WebSockets.dll
-
-No installation script is required. Do not copy Qt6Core.dll into OBS.
-Verify the plugin loads in Help > Log Files > View Current Log.
-The plugin requires the matching Creatora server endpoints.
-"@ | Set-Content -LiteralPath (Join-Path $packageDir 'INSTALL.txt') -Encoding UTF8
-
-    $fileCount = @(Get-ChildItem -LiteralPath $packageDir -File -Recurse).Count
-    if ($fileCount -ne 3) { throw "Unexpected package contents: expected 3 files, got $fileCount" }
+    $files = @(Get-ChildItem -LiteralPath $staging -File -Recurse)
+    if ($files.Count -ne 2) { throw "Unexpected package contents: expected 2 DLLs, got $($files.Count)" }
     if (Test-Path -LiteralPath $outputZip) { Remove-Item -LiteralPath $outputZip -Force }
-    Compress-Archive -LiteralPath $packageDir -DestinationPath $outputZip -CompressionLevel Optimal -ErrorAction Stop
+    Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $outputZip -CompressionLevel Optimal -ErrorAction Stop
     if (-not (Test-Path -LiteralPath $outputZip -PathType Leaf)) { throw 'Distribution ZIP not created.' }
     Write-Host "Distribution ZIP created: $outputZip"
-    Write-Host 'ZIP contains creatora-obs-companion/ with the 3 distribution files; nothing installed.'
+    Write-Host "OBS $ObsMajor package contains exactly two DLLs in $($packageDir.Substring($staging.Length + 1)); nothing installed."
 } finally {
     if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
 }

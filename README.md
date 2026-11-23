@@ -81,3 +81,25 @@ check dependencies using `dumpbin /dependents creatora-obs-companion.dll`
 from a Visual Studio developer command prompt. Windows may be unable to find
 Qt6WebSockets or a required Qt entry point, and an OBS module-load failure alone
 does not identify the exact error.
+
+## Windows ZIP layouts
+
+The local build scripts, standalone OBS 33 packager, and CI release packager
+produce the same two-DLL layouts. ZIPs have no extra root folder, install
+file, nested bin directory, or TLS folder.
+
+OBS 33:
+```text
+plugins/
+└── creatora-obs-companion/
+    ├── creatora-obs-companion.dll
+    └── Qt6WebSockets.dll
+```
+
+OBS 32:
+```text
+obs-plugins/
+└── 64bit/
+    ├── creatora-obs-companion.dll
+    └── Qt6WebSockets.dll
+```
