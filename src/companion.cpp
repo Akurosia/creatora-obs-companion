@@ -9,13 +9,18 @@
 #include <QDateTime>
 #include <QDesktopServices>
 #include <QFormLayout>
+#include <QFile>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QStringList>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QMessageBox>
 #include <QNetworkReply>
 #include <QUrlQuery>
@@ -61,6 +66,13 @@ QJsonArray jsonNames(QStringList names)
     QJsonArray result;
     for (const auto &name : names) result.append(name);
     return result;
+}
+
+void setAllowedFileLabel(QListWidgetItem *item, const QString &name, const QString &path)
+{
+    item->setData(Qt::UserRole + 2, name);
+    item->setText(QString("%1 (%2)").arg(name, path));
+    item->setToolTip(path);
 }
 
 QJsonObject obsInventory()
@@ -215,7 +227,6 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
 {
     setObjectName("CreatoraCompanion");
     auto *layout = new QVBoxLayout(this);
-    layout->addWidget(new QLabel("Creatora OBS Companion — limited remote control", this));
     status_ = new QLabel("Disconnected", this);
     status_->setWordWrap(true);
     layout->addWidget(status_);
@@ -262,14 +273,39 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
     autoConnect_ = new QCheckBox("Connect automatically when OBS starts (security risk)", this);
     autoConnect_->setChecked(false);
     layout->addWidget(autoConnect_);
-    auto *notice = new QLabel("Automatic connection gives Creatora permission to execute the enabled OBS actions whenever OBS is open. Only enable it on a trusted PC and account. Disconnect to stop remote control.", this);
-    notice->setWordWrap(true);
-    layout->addWidget(notice);
-    auto *capability = new QLabel("Capabilities: Scene switching, scene visibility, input mute, Source screenshots / Polaroids", this);
-    capability->setWordWrap(true);
-    layout->addWidget(capability);
+    layout->addWidget(new QLabel("Allowed files (paths stay local)", this));
+    allowedFilesList_ = new QListWidget(this);
+    allowedFilesList_->setMaximumHeight(110);
+    allowedFilesList_->setWordWrap(false);
+    layout->addWidget(allowedFilesList_);
+    auto *fileButtons = new QHBoxLayout;
+    auto *addFileButton = new QPushButton("Allow file…", this);
+    auto *renameFileButton = new QPushButton("Rename selected…", this);
+    auto *removeFileButton = new QPushButton("Remove selected", this);
+    fileButtons->addWidget(addFileButton);
+    fileButtons->addWidget(renameFileButton);
+    fileButtons->addWidget(removeFileButton);
+    layout->addLayout(fileButtons);
     layout->addStretch();
+    connect(&fileWatcher_, &QFileSystemWatcher::fileChanged, this, [this](const QString &path) {
+        for (int index = 0; index < allowedFilesList_->count(); ++index) {
+            const auto *item = allowedFilesList_->item(index);
+            if (item->data(Qt::UserRole + 1).toString() == path)
+                lastFileHashes_.remove(item->data(Qt::UserRole).toString());
+        }
+        QTimer::singleShot(50, this, [this] {
+            refreshAllowedFileWatcher();
+            sendAllowedFileValues();
+        });
+    });
+    connect(&fileWatcher_, &QFileSystemWatcher::directoryChanged, this, [this] {
+        QTimer::singleShot(50, this, [this] {
+            refreshAllowedFileWatcher();
+            sendAllowedFileValues();
+        });
+    });
     loadSettings();
+    refreshAllowedFileWatcher();
     urlInput_->setText(baseUrl_);
     connect(pairButton_, &QPushButton::clicked, this, &CreatoraCompanion::startPairing);
     connect(connectButton_, &QPushButton::clicked, this, &CreatoraCompanion::connectNow);
@@ -294,6 +330,47 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         autoConnect_->setChecked(false);
         saveSettings();
         setStatus("Local pairing removed. Revoke device in Creatora dashboard.");
+    });
+    connect(addFileButton, &QPushButton::clicked, this, [this] {
+        if (allowedFilesList_->count() >= 20) {
+            QMessageBox::warning(this, "File limit", "At most 20 files can be allowed.");
+            return;
+        }
+        const QString path = QFileDialog::getOpenFileName(this, "Allow text file");
+        if (path.isEmpty()) return;
+        const QString canonical = QFileInfo(path).canonicalFilePath();
+        if (canonical.isEmpty()) return;
+        for (int index = 0; index < allowedFilesList_->count(); ++index)
+            if (allowedFilesList_->item(index)->data(Qt::UserRole + 1).toString() == canonical) return;
+        bool accepted = false;
+        const QString name = QInputDialog::getText(this, "File display name", "Name shown in Creatora:",
+            QLineEdit::Normal, QFileInfo(canonical).fileName(), &accepted).trimmed().left(100);
+        if (!accepted || name.isEmpty()) return;
+        auto *item = new QListWidgetItem(allowedFilesList_);
+        item->setData(Qt::UserRole, QUuid::createUuid().toString(QUuid::WithoutBraces));
+        item->setData(Qt::UserRole + 1, canonical);
+        setAllowedFileLabel(item, name, canonical);
+        saveSettings();
+        refreshAllowedFileWatcher();
+        if (socket_.state() == QAbstractSocket::ConnectedState) socket_.close();
+    });
+    connect(renameFileButton, &QPushButton::clicked, this, [this] {
+        auto *item = allowedFilesList_->currentItem();
+        if (!item) return;
+        const QString currentName = item->data(Qt::UserRole + 2).toString();
+        bool accepted = false;
+        const QString name = QInputDialog::getText(this, "File display name", "Name shown in Creatora:",
+            QLineEdit::Normal, currentName, &accepted).trimmed().left(100);
+        if (!accepted || name.isEmpty() || name == currentName) return;
+        setAllowedFileLabel(item, name, item->data(Qt::UserRole + 1).toString());
+        saveSettings();
+        if (socket_.state() == QAbstractSocket::ConnectedState) socket_.close();
+    });
+    connect(removeFileButton, &QPushButton::clicked, this, [this] {
+        delete allowedFilesList_->takeItem(allowedFilesList_->currentRow());
+        saveSettings();
+        refreshAllowedFileWatcher();
+        if (socket_.state() == QAbstractSocket::ConnectedState) socket_.close();
     });
     connect(autoConnect_, &QCheckBox::toggled, this, [this](bool checked) {
         if (checked) {
@@ -335,16 +412,26 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         if (desiredConnected_ && !refreshing_) refreshCredentials(false);
     });
     tokenRefresh_.setInterval(8 * 60 * 1000);
+    connect(&fileSyncTimer_, &QTimer::timeout, this, [this] {
+        refreshAllowedFileWatcher();
+        sendAllowedFileValues();
+    });
+    fileSyncTimer_.setInterval(1000);
+    fileSyncTimer_.start();
     connect(&socket_, &QWebSocket::connected, this, [this] {
         retryAttempt_ = 0;
+        helloAccepted_ = false;
         tokenRefresh_.start();
         setStatus("Connected (remote control enabled)");
+        QJsonObject inventory = obsInventory();
+        inventory.insert("files", allowedFileInventory());
         QJsonObject hello{{"type", "hello"}, {"protocol", 1}, {"device_id", deviceId_},
-                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute", "source.screenshot"}},
-                          {"inventory", obsInventory()}};
+                          {"capabilities", QJsonArray{"scene.switch", "sceneitem.visibility", "input.mute", "source.screenshot", "file.read"}},
+                          {"inventory", inventory}};
         socket_.sendTextMessage(QString::fromUtf8(QJsonDocument(hello).toJson(QJsonDocument::Compact)));
     });
     connect(&socket_, &QWebSocket::disconnected, this, [this] {
+        helloAccepted_ = false;
         tokenRefresh_.stop();
         if (!desiredConnected_ || shuttingDown_) return;
         setStatus("Connection lost; retrying with bounded backoff");
@@ -356,7 +443,11 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
         const auto doc = QJsonDocument::fromJson(message.toUtf8());
         if (!doc.isObject()) return;
         const auto payload = doc.object();
-        if (payload.value("type").toString() == "command") processCommand(payload);
+        if (payload.value("type").toString() == "hello.accepted") {
+            helloAccepted_ = true;
+            lastFileHashes_.clear();
+            sendAllowedFileValues();
+        } else if (payload.value("type").toString() == "command") processCommand(payload);
         else if (payload.value("type").toString() == "ping")
             socket_.sendTextMessage(QStringLiteral("{\"type\":\"pong\"}"));
     });
@@ -719,12 +810,80 @@ void CreatoraCompanion::captureScreenshot(const QString &id, qint64 expiry, cons
     (*send)(0);
 }
 
+QJsonArray CreatoraCompanion::allowedFileInventory() const
+{
+    QJsonArray files;
+    for (int index = 0; index < allowedFilesList_->count(); ++index) {
+        const auto *item = allowedFilesList_->item(index);
+        files.append(QJsonObject{{"id", item->data(Qt::UserRole).toString()},
+                                 {"name", item->data(Qt::UserRole + 2).toString()}});
+    }
+    return files;
+}
+
+void CreatoraCompanion::refreshAllowedFileWatcher()
+{
+    if (!fileWatcher_.files().isEmpty()) fileWatcher_.removePaths(fileWatcher_.files());
+    if (!fileWatcher_.directories().isEmpty()) fileWatcher_.removePaths(fileWatcher_.directories());
+    QStringList files, directories;
+    for (int index = 0; index < allowedFilesList_->count(); ++index) {
+        const QFileInfo info(allowedFilesList_->item(index)->data(Qt::UserRole + 1).toString());
+        if (info.exists()) files.append(info.absoluteFilePath());
+        if (!directories.contains(info.absolutePath())) directories.append(info.absolutePath());
+    }
+    if (!files.isEmpty()) fileWatcher_.addPaths(files);
+    if (!directories.isEmpty()) fileWatcher_.addPaths(directories);
+}
+
+void CreatoraCompanion::sendAllowedFileValues()
+{
+    if (!helloAccepted_ || socket_.state() != QAbstractSocket::ConnectedState) return;
+    for (int index = 0; index < allowedFilesList_->count(); ++index) {
+        const auto *item = allowedFilesList_->item(index);
+        const QString id = item->data(Qt::UserRole).toString();
+        QFile file(item->data(Qt::UserRole + 1).toString());
+        QString content, error;
+        if (!file.open(QIODevice::ReadOnly)) error = "File is unavailable";
+        else {
+            QByteArray bytes = file.read(24000);
+            if (!file.atEnd()) bytes.append("\n…");
+            content = QString::fromUtf8(bytes);
+            content.remove(QRegularExpression("[\\x{0000}-\\x{0008}\\x{000B}\\x{000C}\\x{000E}-\\x{001F}\\x{007F}]"));
+            if (content.size() > 6000) content = content.left(5999) + QStringLiteral("…");
+        }
+        const QByteArray digest = QCryptographicHash::hash((content + QChar(0) + error).toUtf8(), QCryptographicHash::Sha256);
+        if (lastFileHashes_.value(id) == digest) continue;
+        QJsonObject value{{"type", "file.value"}, {"id", id}, {"content", content}, {"error", error},
+                          {"updated_at", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)}};
+        QByteArray payload = QJsonDocument(value).toJson(QJsonDocument::Compact);
+        while (payload.size() > 7500 && !content.isEmpty()) {
+            content.chop(std::min<qsizetype>(256, content.size()));
+            value.insert("content", content + QStringLiteral("…"));
+            payload = QJsonDocument(value).toJson(QJsonDocument::Compact);
+        }
+        if (payload.size() > 7500) continue;
+        socket_.sendTextMessage(QString::fromUtf8(payload));
+        lastFileHashes_.insert(id, digest);
+    }
+}
+
 void CreatoraCompanion::loadSettings()
 {
     QSettings settings("Creatora", kSettingsGroup);
     baseUrl_ = settings.value("url", baseUrl_).toString();
     // Security by default: missing setting means auto-connect off.
     autoConnect_->setChecked(settings.value("auto_connect", false).toBool());
+    const QJsonDocument files = QJsonDocument::fromJson(settings.value("allowed_files").toByteArray());
+    for (const auto value : files.array()) {
+        const QJsonObject file = value.toObject();
+        const QString id = file.value("id").toString(), path = file.value("path").toString();
+        if (QUuid(id).isNull() || path.isEmpty() || allowedFilesList_->count() >= 20) continue;
+        const QString storedName = file.value("name").toString().trimmed().left(100);
+        auto *item = new QListWidgetItem(allowedFilesList_);
+        item->setData(Qt::UserRole, id);
+        item->setData(Qt::UserRole + 1, path);
+        setAllowedFileLabel(item, storedName.isEmpty() ? QFileInfo(path).fileName() : storedName, path);
+    }
     loadSecrets();
 }
 void CreatoraCompanion::saveSettings()
@@ -732,6 +891,14 @@ void CreatoraCompanion::saveSettings()
     QSettings settings("Creatora", kSettingsGroup);
     settings.setValue("url", baseUrl_);
     settings.setValue("auto_connect", autoConnect_->isChecked());
+    QJsonArray files;
+    for (int index = 0; index < allowedFilesList_->count(); ++index) {
+        const auto *item = allowedFilesList_->item(index);
+        files.append(QJsonObject{{"id", item->data(Qt::UserRole).toString()},
+                                 {"name", item->data(Qt::UserRole + 2).toString()},
+                                 {"path", item->data(Qt::UserRole + 1).toString()}});
+    }
+    settings.setValue("allowed_files", QJsonDocument(files).toJson(QJsonDocument::Compact));
 }
 bool CreatoraCompanion::persistSecrets()
 {

@@ -1,5 +1,5 @@
 /build/
-/build-obs33/
+/build-*/
 /dist/
 *.zip
 !docs/*.zip

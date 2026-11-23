@@ -4,14 +4,17 @@
 #include <QWebSocket>
 #include <QTimer>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QSet>
 #include <QQueue>
 #include <QHash>
+#include <QFileSystemWatcher>
 
 class QLineEdit;
 class QLabel;
 class QPushButton;
 class QCheckBox;
+class QListWidget;
 
 class CreatoraCompanion final : public QWidget {
     Q_OBJECT
@@ -23,15 +26,18 @@ private:
     QString deviceId_, accessToken_, refreshToken_, pairingId_, verifier_;
     QLabel *status_ = nullptr, *pairingCode_ = nullptr, *updateInfo_ = nullptr;
     QLineEdit *urlInput_ = nullptr;
+    QListWidget *allowedFilesList_ = nullptr;
     QPushButton *pairButton_ = nullptr, *connectButton_ = nullptr, *disconnectButton_ = nullptr, *unpairButton_ = nullptr;
     QCheckBox *autoConnect_ = nullptr;
     QNetworkAccessManager network_;
     QWebSocket socket_;
-    QTimer pairingPoll_, retryTimer_, tokenRefresh_;
+    QTimer pairingPoll_, retryTimer_, tokenRefresh_, fileSyncTimer_;
+    QFileSystemWatcher fileWatcher_;
     QSet<QString> seen_;
     QQueue<QString> seenOrder_;
     QHash<QString, qint64> recentScreenshots_;
-    bool desiredConnected_ = false, shuttingDown_ = false, refreshing_ = false;
+    QHash<QString, QByteArray> lastFileHashes_;
+    bool desiredConnected_ = false, shuttingDown_ = false, refreshing_ = false, helloAccepted_ = false;
     int retryAttempt_ = 0;
     void setStatus(const QString &text);
     void checkForUpdates();
@@ -51,6 +57,9 @@ private:
     bool persistSecrets();
     bool loadSecrets();
     void forgetSecrets();
+    QJsonArray allowedFileInventory() const;
+    void refreshAllowedFileWatcher();
+    void sendAllowedFileValues();
     bool isSecureEndpoint() const;
     static QString randomString();
 };

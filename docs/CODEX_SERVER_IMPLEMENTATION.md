@@ -88,9 +88,15 @@ In **Mein Konto → OBS Companion** add input for the code and a list of paired 
 - Protect against connection hijacking and duplicated devices: replace or reject old socket on concurrent connection; monitor audit events.
 - Plugin sends after connection:
 ```json
-{"type":"hello","protocol":1,"device_id":"uuid","capabilities":["scene.switch","sceneitem.visibility","input.mute","source.screenshot"],"inventory":{"scenes":["BRB","Gameplay"],"sources":["Alerts","Webcam"],"inputs":["Desktop Audio","Mic/Aux"]}}
+{"type":"hello","protocol":1,"device_id":"uuid","capabilities":["scene.switch","sceneitem.visibility","input.mute","source.screenshot","file.read"],"inventory":{"scenes":["BRB","Gameplay"],"sources":["Alerts","Webcam"],"inputs":["Desktop Audio","Mic/Aux"],"files":[{"id":"uuid","name":"score.txt"}]}}
 ```
 - Server validates protocol, device_id, expected capabilities and the bounded OBS inventory; no commands until hello is accepted. The dashboard uses the inventory for alphabetically sorted selectors.
+
+The optional `file.read` permission only covers files explicitly selected in the plugin UI. Paths stay in local plugin settings and are never advertised. Users may assign each file a display name, so files with identical basenames remain distinguishable; only that display name and the opaque ID are advertised. After `hello.accepted`, the plugin publishes bounded UTF-8 text values by opaque inventory ID:
+```json
+{"type":"file.value","id":"uuid","content":"current value","error":"","updated_at":"2026-11-23T12:00:00.000Z"}
+```
+The server accepts values only for IDs advertised by that device and only when `file.read` is granted. Dashboard configuration must use the advertised device/file dropdowns; it must never accept a typed path or file ID.
 
 ### 6. Command envelopes, validation, and receipts
 
