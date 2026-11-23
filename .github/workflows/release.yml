@@ -29,7 +29,7 @@ jobs:
       matrix:
         include:
           - obs_major: 32
-            obs_version: '32.2.2'
+            obs_version: '32.1.2'
           - obs_major: 33
             obs_version: '33.0.1'
     steps:
@@ -74,6 +74,7 @@ jobs:
           if (-not $core) { throw 'Could not find OBS Qt6Core.dll' }
           $qtVersion = [regex]::Match($core.VersionInfo.ProductVersion, '^\d+\.\d+\.\d+').Value
           if (-not $qtVersion) { throw "Cannot determine Qt version from $($core.VersionInfo.ProductVersion)" }
+          Write-Host "OBS $env:OBS_TARGET_VERSION runtime uses Qt $qtVersion"
           "qt_version=$qtVersion" >> $env:GITHUB_OUTPUT
           "OBS_QT_CORE_DLL=$($core.FullName)" >> $env:GITHUB_ENV
 
@@ -143,6 +144,20 @@ jobs:
             -QtRoot '${{ env.QT_ROOT_DIR }}' `
             -Version '${{ steps.version.outputs.version }}' `
             -ObsQtCoreDll "$env:OBS_QT_CORE_DLL"
+
+      - name: Inspect compiled DLL dependencies
+        shell: pwsh
+        working-directory: companion
+        run: |
+          $plugin = "build-obs${{ matrix.obs_major }}/Release/creatora-obs-companion.dll"
+          $qtWs = Join-Path $env:QT_ROOT_DIR 'bin/Qt6WebSockets.dll'
+          Write-Host "OBS ${{ matrix.obs_version }} target; Qt ${{ steps.runtime.outputs.qt_version }}"
+          Write-Host "Plugin dependencies:"
+          dumpbin /dependents $plugin
+          if ($LASTEXITCODE -ne 0) { throw 'DLL dependency inspection failed' }
+          Write-Host "Qt WebSockets dependencies:"
+          dumpbin /dependents $qtWs
+          if ($LASTEXITCODE -ne 0) { throw 'Qt WebSockets dependency inspection failed' }
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
