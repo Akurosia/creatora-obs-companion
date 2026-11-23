@@ -4,6 +4,7 @@ param(
     [string]$Configuration = 'Release',
     [string]$QtRoot = 'C:\Qt\6.11.1\msvc2022_64',
     [Parameter(Mandatory=$true)][string]$Version,
+    [ValidateSet(32, 33)][int]$ObsMajor = 33,
     [string]$OutputDir = 'dist',
     [string]$ObsQtCoreDll = ''
 )
@@ -36,7 +37,7 @@ try {
     Copy-Item -LiteralPath $wsDll -Destination $dir
     Copy-Item -LiteralPath $schannelDll -Destination (Join-Path $dir 'tls')
     @"
-Creatora OBS Companion v$Version — Windows x64 / OBS 33
+Creatora OBS Companion v$Version — Windows x64 / OBS $ObsMajor
 
 Close OBS completely before updating.
 Extract creatora-obs-companion into:
@@ -44,7 +45,7 @@ Extract creatora-obs-companion into:
 
 Do not overwrite OBS Qt6Core.dll. Start OBS again after installation.
 "@ | Set-Content -LiteralPath (Join-Path $stage 'creatora-obs-companion\INSTALL.txt') -Encoding utf8
-    $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-obs33-win64.zip"
+    $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-obs$ObsMajor-win64.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $stage 'creatora-obs-companion') -DestinationPath $zip -CompressionLevel Optimal
     $sha = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
