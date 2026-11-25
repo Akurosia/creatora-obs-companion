@@ -20,17 +20,20 @@ if ($ObsVersion -and ($ObsVersion -notmatch '^\d+\.\d+\.\d+$' -or -not $ObsVersi
 $obsLabel = if ($ObsVersion) { "obs$ObsVersion" } else { "obs$ObsMajor" }
 $pluginDll = Join-Path $BuildDir "$Configuration\creatora-obs-companion.dll"
 $wsDll = Join-Path $QtRoot 'bin\Qt6WebSockets.dll'
-foreach ($file in @($pluginDll, $wsDll)) {
+$tlsDll = Join-Path $QtRoot 'plugins\tls\qschannelbackend.dll'
+foreach ($file in @($pluginDll, $wsDll, $tlsDll)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing: $file" }
 }
 if (-not $ObsQtCoreDll) { throw 'ObsQtCoreDll is required: provide the Qt6Core.dll from the targeted OBS runtime.' }
 if (-not (Test-Path -LiteralPath $ObsQtCoreDll -PathType Leaf)) { throw "Missing OBS Qt runtime: $ObsQtCoreDll" }
 $coreVersion = (Get-Item -LiteralPath $ObsQtCoreDll).VersionInfo.ProductVersion
 $wsVersion = (Get-Item -LiteralPath $wsDll).VersionInfo.ProductVersion
+$tlsVersion = (Get-Item -LiteralPath $tlsDll).VersionInfo.ProductVersion
 $cm = [regex]::Match($coreVersion, '^\d+\.\d+')
 $wm = [regex]::Match($wsVersion, '^\d+\.\d+')
-if (-not $cm.Success -or -not $wm.Success -or $cm.Value -ne $wm.Value) {
-    throw "Qt ABI mismatch: OBS QtCore=$coreVersion, WebSockets=$wsVersion"
+$tm = [regex]::Match($tlsVersion, '^\d+\.\d+')
+if (-not $cm.Success -or -not $wm.Success -or -not $tm.Success -or $cm.Value -ne $wm.Value -or $cm.Value -ne $tm.Value) {
+    throw "Qt ABI mismatch: OBS QtCore=$coreVersion, WebSockets=$wsVersion, Schannel TLS=$tlsVersion"
 }
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 $stage = Join-Path ([IO.Path]::GetTempPath()) ('creatora-release-' + [guid]::NewGuid().ToString('N'))
@@ -43,8 +46,11 @@ try {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
     Copy-Item -LiteralPath $pluginDll -Destination (Join-Path $dir 'creatora-obs-companion.dll')
     Copy-Item -LiteralPath $wsDll -Destination (Join-Path $dir 'Qt6WebSockets.dll')
+    $tlsDir = Join-Path $dir 'tls'
+    New-Item -ItemType Directory -Force -Path $tlsDir | Out-Null
+    Copy-Item -LiteralPath $tlsDll -Destination (Join-Path $tlsDir 'qschannelbackend.dll')
     $files = @(Get-ChildItem -LiteralPath $stage -File -Recurse)
-    if ($files.Count -ne 2) { throw "Expected exactly 2 DLLs in the package, got $($files.Count)" }
+    if ($files.Count -ne 3) { throw "Expected exactly 3 DLLs in the package, got $($files.Count)" }
     $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-$obsLabel-win64.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
@@ -54,12 +60,14 @@ try {
     if ($ObsMajor -eq 33) {
         $expectedPaths = @(
             'plugins/creatora-obs-companion/creatora-obs-companion.dll',
-            'plugins/creatora-obs-companion/Qt6WebSockets.dll'
+            'plugins/creatora-obs-companion/Qt6WebSockets.dll',
+            'plugins/creatora-obs-companion/tls/qschannelbackend.dll'
         )
     } else {
         $expectedPaths = @(
             'obs-plugins/64bit/creatora-obs-companion.dll',
-            'obs-plugins/64bit/Qt6WebSockets.dll'
+            'obs-plugins/64bit/Qt6WebSockets.dll',
+            'obs-plugins/64bit/tls/qschannelbackend.dll'
         )
     }
     $archive = [System.IO.Compression.ZipFile]::OpenRead($zip)
