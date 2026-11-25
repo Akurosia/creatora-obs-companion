@@ -10,6 +10,13 @@ OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("creatora-obs-companion", "en-US")
 MODULE_EXPORT const char *obs_module_description(void) { return "Creatora secure OBS companion"; }
 
+// The OBS_CURRENT_MODULE accessor is defined by OBS_DECLARE_MODULE in this
+// translation unit. Other source files should not call obs_module_config_path.
+char *creatoraModuleConfigPath(const char *file)
+{
+    return obs_module_get_config_path(obs_current_module(), file);
+}
+
 static CreatoraCompanion *companion = nullptr;
 
 bool obs_module_load(void)
