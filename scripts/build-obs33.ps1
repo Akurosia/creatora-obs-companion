@@ -12,6 +12,8 @@ param(
     [int]$Parallel = 4,
     [string]$GitHubRepository = '',
     [string]$Version = '',
+    [ValidateSet('stable', 'test')]
+    [string]$ReleaseChannel = 'stable',
     [switch]$SkipLegacyPackage,
     [switch]$Clean
 )
@@ -94,6 +96,7 @@ $argsConfigure = @(
     "-DQt6_DIR=$($qtConfigDir.Replace('\','/'))",
     "-DCREATORA_GITHUB_REPOSITORY=$GitHubRepository",
     "-DCREATORA_BUILD_VERSION=$Version",
+    "-DCREATORA_RELEASE_CHANNEL=$ReleaseChannel",
     "-DCREATORA_OBS_MAJOR=$ObsMajor"
 )
 Write-Host "Configuring Creatora OBS Companion for OBS Studio $ObsMajor..."

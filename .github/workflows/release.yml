@@ -103,6 +103,8 @@ jobs:
             $version = $Matches[1]
           }
           if (-not $env:QT_ROOT_DIR) { throw 'Qt installer did not expose QT_ROOT_DIR' }
+          $channel = if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME.StartsWith('t')) { 'test' } else { 'stable' }
+          "channel=$channel" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Configure OBS development libraries
@@ -132,6 +134,7 @@ jobs:
             -QtRoot '${{ env.QT_ROOT_DIR }}' `
             -GitHubRepository '${{ github.repository }}' `
             -Version '${{ steps.version.outputs.version }}' `
+            -ReleaseChannel '${{ steps.version.outputs.channel }}' `
             -SkipLegacyPackage -Clean
 
       - name: Package distribution and SHA-256
