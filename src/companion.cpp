@@ -31,6 +31,7 @@
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QSettings>
+#include <QSslSocket>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QPointer>
@@ -1005,13 +1006,43 @@ void CreatoraCompanion::checkForUpdates()
     auto *reply = network_.get(request);
     auto *timeout = new QTimer(reply);
     timeout->setSingleShot(true);
-    connect(timeout, &QTimer::timeout, reply, &QNetworkReply::abort);
+    connect(timeout, &QTimer::timeout, reply, [reply] {
+        reply->setProperty("creatora_update_timeout", true);
+        reply->abort();
+    });
     timeout->start(10000);
     updateInfo_->setText(QString("Version %1 — checking…").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
-    connect(reply, &QNetworkReply::finished, this, [this, reply, repository] {
+    connect(reply, &QNetworkReply::finished, this, [this, reply, repository, timeout] {
+        timeout->stop();
         const QByteArray data = reply->read(32769);
-        if (reply->error() != QNetworkReply::NoError || data.size() > 32768) {
-            updateInfo_->setText(QString("Version %1 — update check unavailable").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        const bool timedOut = reply->property("creatora_update_timeout").toBool();
+        const bool tlsAvailable = QSslSocket::supportsSsl();
+        const auto networkError = reply->error();
+        if (networkError != QNetworkReply::NoError || httpStatus != 200 || data.size() > 32768) {
+            // Never log response bodies, credentials, or tokens. The Qt error
+            // code, HTTP status and available TLS backends are enough to
+            // distinguish SSL deployment failures from network/API failures.
+            const QString details = reply->errorString().left(160);
+            const QString backends = QSslSocket::availableBackends().join(", ");
+            blog(LOG_WARNING,
+                 "[Creatora] Update check failed: Qt network error=%d, HTTP=%d, timeout=%d, TLS=%d, backends=%s, reason=%s",
+                 int(networkError), httpStatus, int(timedOut), int(tlsAvailable),
+                 backends.toUtf8().constData(), details.toUtf8().constData());
+            QString reason;
+            if (timedOut) {
+                reason = "timed out";
+            } else if (!tlsAvailable) {
+                reason = "TLS backend unavailable";
+            } else if (data.size() > 32768) {
+                reason = "response too large";
+            } else if (httpStatus != 200 && networkError == QNetworkReply::NoError) {
+                reason = QString("HTTP %1").arg(httpStatus);
+            } else {
+                reason = QString("Qt error %1: %2").arg(int(networkError)).arg(details);
+            }
+            updateInfo_->setText(QString("Version %1 — update check failed (%2)")
+                                     .arg(QStringLiteral(CREATORA_PLUGIN_VERSION), reason.toHtmlEscaped()));
             reply->deleteLater();
             return;
         }
