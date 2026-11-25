@@ -7,6 +7,11 @@ if(NOT CREATORA_BUILD_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
 endif()
 project(creatora-obs-companion VERSION ${CREATORA_BUILD_VERSION} LANGUAGES CXX)
 set(CREATORA_GITHUB_REPOSITORY "Akurosia/creatora-obs-companion" CACHE STRING "owner/repo hosting public GitHub Releases")
+set(CREATORA_RELEASE_CHANNEL "stable" CACHE STRING "Update channel: stable or test")
+set_property(CACHE CREATORA_RELEASE_CHANNEL PROPERTY STRINGS stable test)
+if(NOT CREATORA_RELEASE_CHANNEL MATCHES "^(stable|test)$")
+  message(FATAL_ERROR "CREATORA_RELEASE_CHANNEL must be stable or test")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -75,6 +80,7 @@ add_library(creatora-obs-companion MODULE
 )
 target_compile_definitions(creatora-obs-companion PRIVATE
   CREATORA_PLUGIN_VERSION="${PROJECT_VERSION}"
+  CREATORA_RELEASE_CHANNEL="${CREATORA_RELEASE_CHANNEL}"
   CREATORA_RELEASE_REPOSITORY="${CREATORA_GITHUB_REPOSITORY}"
 )
 target_link_libraries(creatora-obs-companion PRIVATE
