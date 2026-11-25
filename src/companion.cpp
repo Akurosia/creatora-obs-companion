@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QDir>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QJsonArray>
@@ -48,7 +49,51 @@
 #include <memory>
 
 namespace {
-constexpr auto kSettingsGroup = "CreatoraObsCompanion";
+// Use OBS's own config root: a portable OBS installation keeps this file
+// alongside its own config, independently of other OBS installations.
+std::unique_ptr<QSettings> companionSettings()
+{
+    char *rawPath = obs_module_config_path("settings.ini");
+    if (!rawPath) {
+        blog(LOG_ERROR, "[Creatora] Unable to resolve OBS plugin configuration path");
+        return {};
+    }
+    const QString path = QString::fromUtf8(rawPath);
+    bfree(rawPath);
+    if (!QDir().mkpath(QFileInfo(path).absolutePath())) {
+        blog(LOG_ERROR, "[Creatora] Unable to create OBS plugin configuration directory");
+        return {};
+    }
+    auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
+    // Only migrate when this OBS instance has no configuration yet. This also
+    // handles an empty settings.ini without overwriting populated settings.
+    // The old QSettings constructor is deliberately used only for migration.
+    if (settings->status() == QSettings::NoError && settings->allKeys().isEmpty()) {
+        QSettings legacy("Creatora", "CreatoraObsCompanion");
+        legacy.setFallbacksEnabled(false);
+        // Copy only keys used by previous releases. Preserve the DPAPI blob
+        // without decrypting it, and keep the original settings untouched.
+        static const char *const keys[] = {
+            "url", "auto_connect", "allowed_files", "encrypted_credentials"
+        };
+        int imported = 0;
+        for (const char *key : keys) {
+            if (!legacy.contains(QLatin1String(key))) continue;
+            settings->setValue(QLatin1String(key), legacy.value(QLatin1String(key)));
+            ++imported;
+        }
+        if (imported > 0) {
+            settings->sync();
+            if (settings->status() == QSettings::NoError) {
+                blog(LOG_INFO, "[Creatora] Imported legacy global settings into OBS-local config");
+            } else {
+                blog(LOG_ERROR, "[Creatora] Failed to persist migrated OBS-local settings");
+            }
+        }
+    }
+    return settings;
+}
+
 constexpr int kMaxReplyBytes = 32768;
 constexpr int kMaxCommandBytes = 8192;
 constexpr int kMaxClockSkewMs = 5000;
@@ -869,11 +914,12 @@ void CreatoraCompanion::sendAllowedFileValues()
 
 void CreatoraCompanion::loadSettings()
 {
-    QSettings settings("Creatora", kSettingsGroup);
-    baseUrl_ = settings.value("url", baseUrl_).toString();
+    auto settings = companionSettings();
+    if (!settings) return;
+    baseUrl_ = settings->value("url", baseUrl_).toString();
     // Security by default: missing setting means auto-connect off.
-    autoConnect_->setChecked(settings.value("auto_connect", false).toBool());
-    const QJsonDocument files = QJsonDocument::fromJson(settings.value("allowed_files").toByteArray());
+    autoConnect_->setChecked(settings->value("auto_connect", false).toBool());
+    const QJsonDocument files = QJsonDocument::fromJson(settings->value("allowed_files").toByteArray());
     for (const auto value : files.array()) {
         const QJsonObject file = value.toObject();
         const QString id = file.value("id").toString(), path = file.value("path").toString();
@@ -888,9 +934,10 @@ void CreatoraCompanion::loadSettings()
 }
 void CreatoraCompanion::saveSettings()
 {
-    QSettings settings("Creatora", kSettingsGroup);
-    settings.setValue("url", baseUrl_);
-    settings.setValue("auto_connect", autoConnect_->isChecked());
+    auto settings = companionSettings();
+    if (!settings) return;
+    settings->setValue("url", baseUrl_);
+    settings->setValue("auto_connect", autoConnect_->isChecked());
     QJsonArray files;
     for (int index = 0; index < allowedFilesList_->count(); ++index) {
         const auto *item = allowedFilesList_->item(index);
@@ -898,22 +945,24 @@ void CreatoraCompanion::saveSettings()
                                  {"name", item->data(Qt::UserRole + 2).toString()},
                                  {"path", item->data(Qt::UserRole + 1).toString()}});
     }
-    settings.setValue("allowed_files", QJsonDocument(files).toJson(QJsonDocument::Compact));
+    settings->setValue("allowed_files", QJsonDocument(files).toJson(QJsonDocument::Compact));
 }
 bool CreatoraCompanion::persistSecrets()
 {
     QJsonObject data{{"device_id", deviceId_}, {"access_token", accessToken_}, {"refresh_token", refreshToken_}};
     QByteArray cipher = protect(QJsonDocument(data).toJson(QJsonDocument::Compact));
     if (cipher.isEmpty()) return false;
-    QSettings settings("Creatora", kSettingsGroup);
-    settings.setValue("encrypted_credentials", cipher.toBase64());
-    settings.sync();
-    return settings.status() == QSettings::NoError;
+    auto settings = companionSettings();
+    if (!settings) return false;
+    settings->setValue("encrypted_credentials", cipher.toBase64());
+    settings->sync();
+    return settings->status() == QSettings::NoError;
 }
 bool CreatoraCompanion::loadSecrets()
 {
-    QSettings settings("Creatora", kSettingsGroup);
-    const QByteArray encoded = settings.value("encrypted_credentials").toByteArray();
+    auto settings = companionSettings();
+    if (!settings) return false;
+    const QByteArray encoded = settings->value("encrypted_credentials").toByteArray();
     if (encoded.isEmpty()) return false;
     const QByteArray plaintext = unprotect(QByteArray::fromBase64(encoded));
     const QJsonDocument doc = QJsonDocument::fromJson(plaintext);
@@ -927,9 +976,10 @@ bool CreatoraCompanion::loadSecrets()
 void CreatoraCompanion::forgetSecrets()
 {
     deviceId_.clear(); accessToken_.clear(); refreshToken_.clear();
-    QSettings settings("Creatora", kSettingsGroup);
-    settings.remove("encrypted_credentials");
-    settings.sync();
+    auto settings = companionSettings();
+    if (!settings) return;
+    settings->remove("encrypted_credentials");
+    settings->sync();
 }
 
 void CreatoraCompanion::checkForUpdates()

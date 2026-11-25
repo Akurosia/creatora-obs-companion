@@ -118,3 +118,42 @@ OBS 32 versions and `plugins/creatora-obs-companion` for OBS 33. Each contains
 only the two DLLs. The build verifies the Qt WebSockets DLL version against the
 matching official OBS runtime, and release filenames include the exact OBS
 version so that mismatched binaries are not installed accidentally.
+
+## OBS-managed companion settings and portable installations
+
+Creatora stores its local configuration through OBS's module configuration path
+(`obs_module_config_path("settings.ini")`), rather than writing to the global
+Windows registry using Qt's organization/application settings.
+
+- Normal OBS: inside OBS's per-user `obs-studio/plugin_config/creatora-obs-companion/` folder.
+- Portable OBS: inside that portable OBS installation's own `config/obs-studio/plugin_config/creatora-obs-companion/` folder.
+- Configuration includes server URL, auto-connect preference, allowed-file list,
+  and Windows DPAPI-encrypted credentials. Independent portable OBS installations
+  no longer share a global configuration.
+
+**Upgrading from older Creatora builds:** If the OBS-specific `settings.ini`
+is missing or empty on startup, the companion imports the existing legacy
+global `Creatora/CreatoraObsCompanion` settings **once** into that OBS
+installation. This includes server URL, auto-connect preference, allowed files,
+and the encrypted pairing credentials. If local settings already exist, they
+are never overwritten by the global settings. Existing global settings are left
+untouched, and the migration logs success without logging any secrets.
+
+**Portable-installation note:** Each new portable OBS installation with no
+local configuration will import the same legacy global settings if they exist.
+This includes the previous device pairing, so unpair/re-pair if you want unique
+device credentials per portable OBS instance. Windows DPAPI encryption is still
+bound to the Windows user: after moving a portable folder to another Windows
+account or machine, existing credentials may not decrypt and re-pairing will
+be necessary.
+
+## OBS major-version compatibility
+
+OBS 32.1.2 uses Qt 6.8.3, whereas OBS 32.2.2 uses Qt 6.11.1. Qt aims for
+binary forward compatibility from older to newer Qt 6 runtimes; this does not
+guarantee OBS module ABI compatibility or that a bundled Qt6WebSockets DLL
+will load in a newer OBS runtime. The known v0.1.8 binary failed to load
+under OBS 32.2.2, so the CI retains **separate OBS 32.1.2 and 32.2.2
+artifacts** until a single OBS 32 DLL pair is tested successfully on both.
+OBS 33 uses its own artifact. Do not rename an unverified OBS 32.1 binary
+as a universal OBS 32 release.

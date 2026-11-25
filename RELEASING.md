@@ -37,3 +37,12 @@ GitHub Releases uses `--prerelease` for test tags so test builds do not replace 
 The macOS and Linux jobs currently use `continue-on-error` and publish build artifacts for engineering validation only. They do not produce a verified installation package or appear in either GitHub Release type. They run for stable tags and ordinary CI, but skip on test tags.
 
 **Manual builds:** `workflow_dispatch` remains available on any selectable branch; ensure the workflow file exists on the selected ref. Manual dispatch never publishes a release because the publishing job requires a tag `push` event.
+
+## Why OBS 32 currently has two archives
+
+The OBS 32.1.2 runtime uses Qt 6.8.3 and OBS 32.2.2 uses Qt 6.11.1.
+A single OBS 32 build is desirable and may be possible using an older Qt
+baseline, but the v0.1.8 OBS 32.1 build does not load in OBS 32.2.2.
+For now, retain and label both packages until both clean portable runtimes
+pass loading and functional tests for a shared binary. Do not remove
+compatibility variants based only on CMake compile success.
