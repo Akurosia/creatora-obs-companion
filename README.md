@@ -118,3 +118,34 @@ OBS 32 versions and `plugins/creatora-obs-companion` for OBS 33. Each contains
 only the two DLLs. The build verifies the Qt WebSockets DLL version against the
 matching official OBS runtime, and release filenames include the exact OBS
 version so that mismatched binaries are not installed accidentally.
+
+## OBS-managed companion settings and portable installations
+
+Creatora stores its local configuration through OBS's module configuration path
+(`obs_module_config_path("settings.ini")`), rather than writing to the global
+Windows registry using Qt's organization/application settings.
+
+- Normal OBS: inside OBS's per-user `obs-studio/plugin_config/creatora-obs-companion/` folder.
+- Portable OBS: inside that portable OBS installation's own `config/obs-studio/plugin_config/creatora-obs-companion/` folder.
+- Configuration includes server URL, auto-connect preference, allowed-file list,
+  and Windows DPAPI-encrypted credentials. Independent portable OBS installations
+  no longer share a global configuration.
+
+**Upgrading from older Creatora builds:** Existing global settings are **not**
+imported automatically. Re-enter the server URL and pair once in each OBS
+installation. This avoids accidentally sharing device credentials between
+portable installations. Existing Windows registry data is not automatically
+deleted. The DPAPI encryption still binds credentials to the Windows user;
+copying a portable OBS folder to another Windows account or machine requires
+pairing again.
+
+## OBS major-version compatibility
+
+OBS 32.1.2 uses Qt 6.8.3, whereas OBS 32.2.2 uses Qt 6.11.1. Qt aims for
+binary forward compatibility from older to newer Qt 6 runtimes; this does not
+guarantee OBS module ABI compatibility or that a bundled Qt6WebSockets DLL
+will load in a newer OBS runtime. The known v0.1.8 binary failed to load
+under OBS 32.2.2, so the CI retains **separate OBS 32.1.2 and 32.2.2
+artifacts** until a single OBS 32 DLL pair is tested successfully on both.
+OBS 33 uses its own artifact. Do not rename an unverified OBS 32.1 binary
+as a universal OBS 32 release.
