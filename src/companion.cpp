@@ -507,11 +507,15 @@ CreatoraCompanion::CreatoraCompanion(QWidget *parent) : QWidget(parent)
 
 void CreatoraCompanion::shutdown()
 {
+    if (shuttingDown_) return;
     shuttingDown_ = true;
     desiredConnected_ = false;
     pairingPoll_.stop();
     retryTimer_.stop();
     tokenRefresh_.stop();
+    fileSyncTimer_.stop();
+    fileWatcher_.removePaths(fileWatcher_.files());
+    fileWatcher_.removePaths(fileWatcher_.directories());
     socket_.close();
     saveSettings();
 }
