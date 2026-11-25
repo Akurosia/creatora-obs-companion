@@ -86,15 +86,18 @@ does not identify the exact error.
 ## Windows ZIP layouts
 
 The local build scripts, standalone OBS 33 packager, and CI release packager
-produce the same two-DLL layouts. ZIPs have no extra root folder, install
-file, nested bin directory, or TLS folder.
+produce the same three-DLL layouts. ZIPs have no extra root folder, install
+file, or nested bin directory. The TLS plugin is under each plugin's `tls/`
+subdirectory, not next to Qt6Network.dll.
 
 OBS 33:
 ```text
 plugins/
 └── creatora-obs-companion/
     ├── creatora-obs-companion.dll
-    └── Qt6WebSockets.dll
+    ├── Qt6WebSockets.dll
+    └── tls/
+        └── qschannelbackend.dll
 ```
 
 OBS 32:
@@ -102,7 +105,9 @@ OBS 32:
 obs-plugins/
 └── 64bit/
     ├── creatora-obs-companion.dll
-    └── Qt6WebSockets.dll
+    ├── Qt6WebSockets.dll
+    └── tls/
+        └── qschannelbackend.dll
 ```
 
 ### OBS-specific release archives
@@ -115,9 +120,10 @@ GitHub Actions now produces three distinct Windows archives for each version tag
 
 The archive's **internal folder layout** remains `obs-plugins/64bit` for both
 OBS 32 versions and `plugins/creatora-obs-companion` for OBS 33. Each contains
-only the two DLLs. The build verifies the Qt WebSockets DLL version against the
-matching official OBS runtime, and release filenames include the exact OBS
-version so that mismatched binaries are not installed accidentally.
+the companion DLL, Qt WebSockets DLL, and Windows Schannel TLS backend DLL.
+The build verifies Qt WebSockets and Schannel major/minor versions against
+Qt6Core.dll from the matching official OBS runtime; release filenames include
+the exact OBS version to avoid accidental ABI mismatches.
 
 ## OBS-managed companion settings and portable installations
 
@@ -157,3 +163,17 @@ under OBS 32.2.2, so the CI retains **separate OBS 32.1.2 and 32.2.2
 artifacts** until a single OBS 32 DLL pair is tested successfully on both.
 OBS 33 uses its own artifact. Do not rename an unverified OBS 32.1 binary
 as a universal OBS 32 release.
+
+## HTTPS/TLS support on Windows
+
+Qt 6 loads its TLS implementation as a plugin. Windows packages now include
+`tls/qschannelbackend.dll` from the exact matching Qt installation; it uses
+the native Windows Schannel TLS implementation, not a separately supplied
+OpenSSL library. Qt searches the plugin installation path because
+`plugin.cpp` adds the Creatora binary directory via
+`QApplication::addLibraryPath()` before initializing the companion.
+
+This fixes the packaging omission behind `TLS backend unavailable` in clean
+portable OBS 32.2.2 installations. Do not copy a TLS plugin from a different
+Qt minor version or place it directly in `bin/64bit`; keep it in the packaged
+`tls/` directory. A successful build must still be tested in portable OBS.

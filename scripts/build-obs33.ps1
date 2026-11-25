@@ -118,7 +118,8 @@ if ($SkipLegacyPackage) { return }
 # The archive is not extracted or installed anywhere by this script.
 $pluginDll = Join-Path (Join-Path $BuildDir $Configuration) 'creatora-obs-companion.dll'
 $webSocketsDll = Join-Path $QtRoot 'bin\Qt6WebSockets.dll'
-foreach ($file in @($pluginDll, $webSocketsDll)) {
+$tlsDll = Join-Path $QtRoot 'plugins\tls\qschannelbackend.dll'
+foreach ($file in @($pluginDll, $webSocketsDll, $tlsDll)) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
         throw "Cannot create distribution ZIP; missing required file: $file"
     }
@@ -147,14 +148,17 @@ try {
     New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
     Copy-Item -LiteralPath $pluginDll -Destination (Join-Path $packageDir 'creatora-obs-companion.dll')
     Copy-Item -LiteralPath $webSocketsDll -Destination (Join-Path $packageDir 'Qt6WebSockets.dll')
+    $tlsDir = Join-Path $packageDir 'tls'
+    New-Item -ItemType Directory -Force -Path $tlsDir | Out-Null
+    Copy-Item -LiteralPath $tlsDll -Destination (Join-Path $tlsDir 'qschannelbackend.dll')
 
     $files = @(Get-ChildItem -LiteralPath $staging -File -Recurse)
-    if ($files.Count -ne 2) { throw "Unexpected package contents: expected 2 DLLs, got $($files.Count)" }
+    if ($files.Count -ne 3) { throw "Unexpected package contents: expected 3 DLLs, got $($files.Count)" }
     if (Test-Path -LiteralPath $outputZip) { Remove-Item -LiteralPath $outputZip -Force }
     Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $outputZip -CompressionLevel Optimal -ErrorAction Stop
     if (-not (Test-Path -LiteralPath $outputZip -PathType Leaf)) { throw 'Distribution ZIP not created.' }
     Write-Host "Distribution ZIP created: $outputZip"
-    Write-Host "OBS $ObsMajor package contains exactly two DLLs in $($packageDir.Substring($staging.Length + 1)); nothing installed."
+    Write-Host "OBS $ObsMajor package contains exactly three DLLs (including tls/qschannelbackend.dll) in $($packageDir.Substring($staging.Length + 1)); nothing installed."
 } finally {
     if (Test-Path -LiteralPath $staging) { Remove-Item -LiteralPath $staging -Recurse -Force }
 }
