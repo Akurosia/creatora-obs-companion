@@ -1,92 +1,35 @@
-# Creatora OBS Companion — release process
+# Creatora OBS Companion — Releases and CI
 
-## Versioning from Git tags
+## Test versus stable tags
 
-CI uses the pushed `vMAJOR.MINOR.PATCH` Git tag as the **only source of release versions**. It injects `CREATORA_BUILD_VERSION` into the CMake build on Windows, macOS, and Linux. The version embedded in the plugin and Windows ZIP filename therefore matches the tag.
+- `tMAJOR.MINOR.PATCH` (e.g. `t0.1.9`): build the three Windows x64 targets **only** (OBS 32.1.2, OBS 32.2.2, and OBS 33.0.1). Publish their ZIPs and SHA-256 checksums as a GitHub **prerelease**. macOS/Linux jobs are skipped.
+- `vMAJOR.MINOR.PATCH` (e.g. `v0.1.9`): build all Windows targets **and** run experimental macOS and Linux CI. Publish the Windows ZIPs and checksums as a normal GitHub Release. The experimental artifacts remain in Actions, not the release.
+- PRs, pushes to `main`, and manual workflow runs: preserve the existing CI jobs; only tag pushes publish releases.
 
-For branch pushes, pull requests, and manual runs without a tag, the version is `0.0.0`. These builds publish Actions artifacts only, not GitHub Releases.
+Windows builds read the matching official OBS Qt version, compile against that OBS version, and package exactly two DLLs in the required OBS-version-specific layout. Stable/test tags both embed `MAJOR.MINOR.PATCH` (without `v` or `t`) into the plugin. Thus a test release `t0.1.9` and stable release `v0.1.9` both embed version `0.1.9`.
 
-To release any version, first push changes to `main`, then push a new matching tag. **Do not edit `CMakeLists.txt` to change the version.**
-
-```bash
-git checkout main
-git pull --ff-only
-git tag v0.1.3
-git push origin v0.1.3
-```
-
-
-## Build matrix
-
-- **Windows x64:** stable GitHub-hosted `windows-2022` build; produces the Windows ZIP and SHA-256 checksum.
-- **macOS x86_64:** experimental GitHub-hosted `macos-15-intel` compile job. Artifacts are for engineering validation only.
-- **Linux x86_64:** experimental GitHub-hosted `ubuntu-24.04` compile job. Artifacts are for engineering validation only.
-
-The experimental jobs use `continue-on-error`; their failures must be fixed before enabling release distribution. In particular, non-Windows credential encryption currently refuses pairing, macOS still needs a validated OBS `.plugin` bundle, and Linux needs a verified OBS-compatible installation layout. **Do not distribute the experimental binaries as working releases.**
-
-## Why a successful build did not publish a release
-
-Commits on `main` only upload workflow artifacts. The GitHub Release step executes only for a pushed `vX.Y.Z` tag matching the CMake project version. Currently CMake declares `0.1.2`. To publish the first Windows release after validating the build:
+## Usage
 
 ```bash
-git checkout main
+git switch main
 git pull --ff-only
-git tag v0.1.2
-git push origin v0.1.2
+git tag t0.1.9
+git push origin t0.1.9
 ```
 
-Check **Actions** for the tag build and **Releases** for the resulting ZIP. Never create the GitHub release manually before the workflow runs, because the current `gh release create` step expects to create it itself.
+After validating the Windows test release, create the stable tag from the desired commit:
 
-**Private repository note:** Public clients cannot check GitHub releases in a private repository without credentials. To support in-app update checks for external users, configure a separate public releases repository and publish the assets there; do not embed a GitHub token in the plugin.
+```bash
+git switch main
+git pull --ff-only
+git tag v0.1.9
+git push origin v0.1.9
+```
 
----
+GitHub Releases uses `--prerelease` for test tags so test builds do not replace the latest stable release shown to normal users. A tag name must be unique; move to a higher test version (e.g. `t0.1.10`) for another test instead of overwriting published tags.
 
-# Releasing Creatora OBS Companion (OBS Studio 33 / Windows x64)
+**Important:** The plugin's update check uses GitHub's latest stable Release endpoint; test prereleases will not be advertised to ordinary users. Test releases still need manual installation and testing inside the target OBS runtime.
 
-The GitHub Actions workflow runs on **GitHub-hosted `windows-2022` runners**.
-There is **no self-hosted runner**, and no `OBS_SOURCE_ROOT`, `QT_ROOT`, or
-`OBS_QT_CORE_DLL` repository variable is required.
+## Experimental platforms
 
-## Pipeline
-
-1. Check out the plugin and the official OBS Studio **33.0.1** source.
-2. Install **Qt 6.11.1 MSVC x64** with the WebSockets module on the runner.
-3. Run OBS's own Windows preset to download its pinned development dependencies.
-4. Compile the `obs-frontend-api` target (and dependent `libobs` library).
-5. Build the standalone Creatora module using those OBS development libraries.
-6. Download the **official OBS 33.0.1 Windows x64 ZIP** and verify that the
-   plugin's Qt WebSockets DLL matches its `Qt6Core.dll` major/minor version.
-7. Package `creatora-obs-companion-vX.Y.Z-obs33-win64.zip` and its `.sha256`.
-8. Upload the files as GitHub Actions artifacts on branch, pull-request and manual builds.
-9. On a matching `vX.Y.Z` tag pushed to GitHub, publish both files in GitHub Releases.
-
-Build validation runs on `main` and pull requests. Release publishing only runs
-for pushed tags. The workflow uses only the built-in `GITHUB_TOKEN` with write
-permission in its tag-publishing job.
-
-## How to publish
-
-Follow the tag-only process above. The `Publish GitHub Release` step runs only on tag pushes, after the Windows package is built.
-
-## Important compatibility and deployment notes
-
-- OBS 33.0.1 uses Qt 6.11.1 in the previously verified Windows runtime. This
-  workflow deliberately pins that Qt version and refuses mismatched packages.
-- Build and packaging remain **Windows x64 only**. The example workflow's
-  OBS 28, Qt 6.3.1, Windows x86 and macOS/Linux settings must not be copied.
-- A successful Actions build is **not a live OBS plugin loading test**. Verify
-  one release on the actual OBS 33 installation before distributing it broadly.
-- The first GitHub-hosted run may fail due to upstream OBS dependencies,
-  the Qt archive mirror, or changes in the OBS preset. The workflow is prepared
-  but has **not been executed on GitHub Actions yet**.
-- On OBS 33 the plugin has a `source.screenshot` capability for the optional
-  Polaroid capture flow. Publishing the DLL does not configure Discord delivery;
-  that is a separate server/bot concern.
-
-## Update notifications
-
-When built with `CREATORA_GITHUB_REPOSITORY`, the OBS dock can check the latest
-public GitHub Release for a newer version. This pipeline passes the repository
-name automatically. Pre-releases are not returned by GitHub's `/releases/latest`
-endpoint. The plugin shows an update link but does not overwrite a DLL while OBS
-is running.
+The macOS and Linux jobs currently use `continue-on-error` and publish build artifacts for engineering validation only. They do not produce a verified installation package or appear in either GitHub Release type. They run for stable tags and ordinary CI, but skip on test tags.
