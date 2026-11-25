@@ -995,10 +995,17 @@ void CreatoraCompanion::checkForUpdates()
     const QString repository = QStringLiteral(CREATORA_RELEASE_REPOSITORY);
     static const QRegularExpression validRepo("^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$");
     if (!validRepo.match(repository).hasMatch()) {
-        updateInfo_->setText(QString("Version %1 — release repository not configured").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        updateInfo_->setText(QString("Version %1 — release repository not configured")
+                                 .arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
         return;
     }
-    const QUrl url("https://api.github.com/repos/" + repository + "/releases/latest");
+
+    // The release channel is compiled from the pushed t/v tag. Stable builds
+    // never suggest prereleases; test builds may upgrade to a newer prerelease
+    // or stable release (including a stable release of the same version).
+    const bool testChannel = QStringLiteral(CREATORA_RELEASE_CHANNEL) == QLatin1String("test");
+    const QString endpoint = testChannel ? "/releases?per_page=30" : "/releases/latest";
+    const QUrl url("https://api.github.com/repos/" + repository + endpoint);
     QNetworkRequest request(url);
     request.setRawHeader("Accept", "application/vnd.github+json");
     request.setRawHeader("User-Agent", "Creatora-OBS-Companion/" CREATORA_PLUGIN_VERSION);
@@ -1011,18 +1018,19 @@ void CreatoraCompanion::checkForUpdates()
         reply->abort();
     });
     timeout->start(10000);
-    updateInfo_->setText(QString("Version %1 — checking…").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
-    connect(reply, &QNetworkReply::finished, this, [this, reply, repository, timeout] {
+    updateInfo_->setText(QString("Version %1 — checking %2 releases…")
+                             .arg(QStringLiteral(CREATORA_PLUGIN_VERSION),
+                                  testChannel ? "test and stable" : "stable"));
+    connect(reply, &QNetworkReply::finished, this, [this, reply, timeout, repository, testChannel] {
         timeout->stop();
-        const QByteArray data = reply->read(32769);
+        // /releases returns an array and may exceed the old 32 KiB limit.
+        constexpr qint64 kMaxReleaseResponse = 1024 * 1024;
+        const QByteArray data = reply->read(kMaxReleaseResponse + 1);
         const int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         const bool timedOut = reply->property("creatora_update_timeout").toBool();
         const bool tlsAvailable = QSslSocket::supportsSsl();
         const auto networkError = reply->error();
-        if (networkError != QNetworkReply::NoError || httpStatus != 200 || data.size() > 32768) {
-            // Never log response bodies, credentials, or tokens. The Qt error
-            // code, HTTP status and available TLS backends are enough to
-            // distinguish SSL deployment failures from network/API failures.
+        if (networkError != QNetworkReply::NoError || httpStatus != 200 || data.size() > kMaxReleaseResponse) {
             const QString details = reply->errorString().left(160);
             const QString backends = QSslSocket::availableBackends().join(", ");
             blog(LOG_WARNING,
@@ -1034,7 +1042,7 @@ void CreatoraCompanion::checkForUpdates()
                 reason = "timed out";
             } else if (!tlsAvailable) {
                 reason = "TLS backend unavailable";
-            } else if (data.size() > 32768) {
+            } else if (data.size() > kMaxReleaseResponse) {
                 reason = "response too large";
             } else if (httpStatus != 200 && networkError == QNetworkReply::NoError) {
                 reason = QString("HTTP %1").arg(httpStatus);
@@ -1046,21 +1054,69 @@ void CreatoraCompanion::checkForUpdates()
             reply->deleteLater();
             return;
         }
-        const auto document = QJsonDocument::fromJson(data);
-        const QJsonObject release = document.isObject() ? document.object() : QJsonObject{};
-        const QString tag = release.value("tag_name").toString();
-        QString normalizedTag = tag;
-        if (normalizedTag.startsWith('v')) normalizedTag.remove(0, 1);
-        const QVersionNumber latest = QVersionNumber::fromString(normalizedTag);
-        const QVersionNumber current = QVersionNumber::fromString(QStringLiteral(CREATORA_PLUGIN_VERSION));
-        if (latest.isNull() || current.isNull() || normalizedTag != latest.toString()) {
-            updateInfo_->setText(QString("Version %1 — unknown release version").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
-        } else if (QVersionNumber::compare(latest, current) > 0) {
-            const QString releaseUrl = "https://github.com/" + repository + "/releases/tag/" + QString::fromUtf8(QUrl::toPercentEncoding(tag));
-            updateInfo_->setText(QString("Version %1 — <a href=\"%2\">Update %3 available</a> (restart OBS after installation)")
-                                     .arg(QStringLiteral(CREATORA_PLUGIN_VERSION), releaseUrl.toHtmlEscaped(), tag.toHtmlEscaped()));
+
+        QJsonParseError parseError;
+        const QJsonDocument document = QJsonDocument::fromJson(data, &parseError);
+        if (parseError.error != QJsonParseError::NoError ||
+            (testChannel ? !document.isArray() : !document.isObject())) {
+            blog(LOG_WARNING, "[Creatora] Invalid GitHub release JSON response");
+            updateInfo_->setText(QString("Version %1 — invalid GitHub release response")
+                                     .arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+            reply->deleteLater();
+            return;
+        }
+
+        QJsonArray releases;
+        if (testChannel) {
+            releases = document.array();
         } else {
-            updateInfo_->setText(QString("Version %1 — up to date").arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+            releases.append(document.object());
+        }
+
+        static const QRegularExpression validTag("^[vt]([0-9]+[.][0-9]+[.][0-9]+)$");
+        const QVersionNumber current = QVersionNumber::fromString(QStringLiteral(CREATORA_PLUGIN_VERSION));
+        QVersionNumber best;
+        QString bestTag;
+        bool bestIsStable = false;
+        for (const auto &value : releases) {
+            const QJsonObject release = value.toObject();
+            if (release.isEmpty() || release.value("draft").toBool()) continue;
+            const QString tag = release.value("tag_name").toString();
+            const auto match = validTag.match(tag);
+            if (!match.hasMatch()) continue;
+            const bool stable = tag.startsWith('v');
+            if (!testChannel && !stable) continue;
+            // Only consider our official v-tags and t-tag prereleases.
+            if (release.value("prerelease").toBool() == stable) continue;
+            const QString versionText = match.captured(1);
+            const QVersionNumber candidate = QVersionNumber::fromString(versionText);
+            if (candidate.isNull() || candidate.toString() != versionText) continue;
+            const int comparison = QVersionNumber::compare(candidate, best);
+            if (bestTag.isEmpty() || comparison > 0 ||
+                (comparison == 0 && stable && !bestIsStable)) {
+                best = candidate;
+                bestTag = tag;
+                bestIsStable = stable;
+            }
+        }
+
+        if (current.isNull() || bestTag.isEmpty()) {
+            updateInfo_->setText(QString("Version %1 — no compatible release found")
+                                     .arg(QStringLiteral(CREATORA_PLUGIN_VERSION)));
+        } else {
+            const int comparison = QVersionNumber::compare(best, current);
+            const bool stablePromotion = testChannel && bestIsStable && comparison == 0;
+            if (comparison > 0 || stablePromotion) {
+                const QString releaseUrl = "https://github.com/" + repository + "/releases/tag/" +
+                                           QString::fromUtf8(QUrl::toPercentEncoding(bestTag));
+                updateInfo_->setText(QString("Version %1 — <a href=\"%2\">Update %3 available</a> (restart OBS after installation)")
+                                         .arg(QStringLiteral(CREATORA_PLUGIN_VERSION),
+                                              releaseUrl.toHtmlEscaped(), bestTag.toHtmlEscaped()));
+            } else {
+                updateInfo_->setText(QString("Version %1 — up to date (%2 channel)")
+                                         .arg(QStringLiteral(CREATORA_PLUGIN_VERSION),
+                                              testChannel ? "test" : "stable"));
+            }
         }
         reply->deleteLater();
     });
