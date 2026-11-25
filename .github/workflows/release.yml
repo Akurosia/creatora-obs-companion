@@ -21,7 +21,7 @@ env:
 
 jobs:
   windows-x64:
-    name: Windows x64 / OBS ${{ matrix.obs_major }}
+    name: Windows x64 / OBS ${{ matrix.obs_version }}
     runs-on: windows-2022
     timeout-minutes: 120
     strategy:
@@ -30,6 +30,8 @@ jobs:
         include:
           - obs_major: 32
             obs_version: '32.1.2'
+          - obs_major: 32
+            obs_version: '32.2.2'
           - obs_major: 33
             obs_version: '33.0.1'
     steps:
@@ -140,6 +142,7 @@ jobs:
         run: |
           ./scripts/package-release.ps1 `
             -ObsMajor ${{ matrix.obs_major }} `
+            -ObsVersion '${{ matrix.obs_version }}' `
             -BuildDir 'build-obs${{ matrix.obs_major }}' `
             -QtRoot '${{ env.QT_ROOT_DIR }}' `
             -Version '${{ steps.version.outputs.version }}' `
@@ -172,7 +175,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: creatora-obs-companion-obs${{ matrix.obs_major }}-windows-x64
+          name: creatora-obs-companion-obs${{ matrix.obs_version }}-windows-x64
           path: companion/dist/*
           if-no-files-found: error
 
@@ -184,7 +187,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download both OBS release archives
+      - name: Download all OBS release archives
         uses: actions/download-artifact@v7
         with:
           pattern: creatora-obs-companion-obs*-windows-x64
@@ -195,7 +198,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 4
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 6
           gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes \
             --title "Creatora OBS Companion $GITHUB_REF_NAME"
 

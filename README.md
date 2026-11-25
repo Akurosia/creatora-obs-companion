@@ -71,9 +71,10 @@ CI publishes separate OBS 32 and OBS 33 Windows archives.
 
 ## OBS 32.1.x compatibility
 
-The OBS 32 Windows CI build targets OBS **32.1.2** and its matching Qt runtime.
-OBS 32.2.x is a separate runtime target and is not guaranteed compatible with
-this 32.1.x build. OBS logs now print compiled/runtime Qt versions and an
+The Windows CI builds **separate OBS 32.1.2 (Qt 6.8.3)** and
+**OBS 32.2.2 (Qt 6.11.1)** binaries, each compiled against the matching
+OBS source and Qt runtime. Use the ZIP matching your installed OBS version;
+these builds are not interchangeable. OBS logs now print compiled/runtime Qt versions and an
 explicit reason when the plugin's dock initialization fails.
 
 If OBS prints only `Module '../../obs-plugins/64bit/creatora-obs-companion.dll' not loaded`,
@@ -103,3 +104,17 @@ obs-plugins/
     ├── creatora-obs-companion.dll
     └── Qt6WebSockets.dll
 ```
+
+### OBS-specific release archives
+
+GitHub Actions now produces three distinct Windows archives for each version tag:
+
+- `creatora-obs-companion-vVERSION-obs32.1.2-win64.zip` (OBS 32.1.2, Qt 6.8.3)
+- `creatora-obs-companion-vVERSION-obs32.2.2-win64.zip` (OBS 32.2.2, Qt 6.11.1)
+- `creatora-obs-companion-vVERSION-obs33.0.1-win64.zip` (OBS 33.0.1)
+
+The archive's **internal folder layout** remains `obs-plugins/64bit` for both
+OBS 32 versions and `plugins/creatora-obs-companion` for OBS 33. Each contains
+only the two DLLs. The build verifies the Qt WebSockets DLL version against the
+matching official OBS runtime, and release filenames include the exact OBS
+version so that mismatched binaries are not installed accidentally.
