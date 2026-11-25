@@ -5,6 +5,7 @@ param(
     [string]$QtRoot = 'C:\Qt\6.11.1\msvc2022_64',
     [Parameter(Mandatory=$true)][string]$Version,
     [ValidateSet(32, 33)][int]$ObsMajor = 33,
+    [string]$ObsVersion = '',
     [string]$OutputDir = 'dist',
     [string]$ObsQtCoreDll = ''
 )
@@ -13,6 +14,10 @@ $root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if (-not [IO.Path]::IsPathRooted($BuildDir)) { $BuildDir = Join-Path $root $BuildDir }
 if (-not [IO.Path]::IsPathRooted($OutputDir)) { $OutputDir = Join-Path $root $OutputDir }
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must be Major.Minor.Patch' }
+if ($ObsVersion -and ($ObsVersion -notmatch '^\d+\.\d+\.\d+$' -or -not $ObsVersion.StartsWith("$ObsMajor."))) {
+    throw "ObsVersion must be a version matching OBS major $ObsMajor (e.g. $ObsMajor.1.2)"
+}
+$obsLabel = if ($ObsVersion) { "obs$ObsVersion" } else { "obs$ObsMajor" }
 $pluginDll = Join-Path $BuildDir "$Configuration\creatora-obs-companion.dll"
 $wsDll = Join-Path $QtRoot 'bin\Qt6WebSockets.dll'
 foreach ($file in @($pluginDll, $wsDll)) {
@@ -40,7 +45,7 @@ try {
     Copy-Item -LiteralPath $wsDll -Destination (Join-Path $dir 'Qt6WebSockets.dll')
     $files = @(Get-ChildItem -LiteralPath $stage -File -Recurse)
     if ($files.Count -ne 2) { throw "Expected exactly 2 DLLs in the package, got $($files.Count)" }
-    $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-obs$ObsMajor-win64.zip"
+    $zip = Join-Path $OutputDir "creatora-obs-companion-v$Version-$obsLabel-win64.zip"
     if (Test-Path $zip) { Remove-Item $zip -Force }
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
     # Validate the ZIP entries, not just the staging directory. Prevent nested bin
