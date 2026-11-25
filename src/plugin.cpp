@@ -2,6 +2,7 @@
 #include <obs-module.h>
 #include <obs-frontend-api.h>
 #include <QApplication>
+#include <QPointer>
 #include <QFileInfo>
 #include <QVersionNumber>
 #include <QtGlobal>
@@ -17,7 +18,9 @@ char *creatoraModuleConfigPath(const char *file)
     return obs_module_get_config_path(obs_current_module(), file);
 }
 
-static CreatoraCompanion *companion = nullptr;
+// OBS owns the dock widget after obs_frontend_add_dock_by_id().
+// QPointer becomes null when OBS destroys the widget during shutdown.
+static QPointer<CreatoraCompanion> companion;
 
 bool obs_module_load(void)
 {
@@ -35,15 +38,21 @@ bool obs_module_load(void)
         blog(LOG_ERROR, "[Creatora] Failed to register dock creatora-companion-dock (duplicate dock ID or unsupported frontend)");
         return false;
     }
+    // Save settings and close connections before OBS dismantles its UI.
+    // QObject's receiver context ensures this runs only while the dock exists.
+    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
+                     companion.data(), [] {
+                         if (companion) companion->shutdown();
+                     });
     blog(LOG_INFO, "[Creatora] Companion loaded (manual connection default)");
     return true;
 }
 
 void obs_module_unload(void)
 {
-    if (companion) {
-        companion->shutdown();
-        obs_frontend_remove_dock("creatora-companion-dock");
-        companion = nullptr;
-    }
+    // OBS calls module unload from obs_shutdown(), after frontend teardown.
+    // Do NOT call obs_frontend_remove_dock() here: that accesses an OBS main
+    // window which may already have been destroyed (shutdown crash).
+    // OBS owns and destroys the dock widget with its main window.
+    companion = nullptr;
 }
