@@ -3,7 +3,7 @@ name: Build and release OBS Companion
 on:
   push:
     branches: [main]
-    tags: ['v*.*.*']
+    tags: ['v*.*.*', 't*.*.*']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -99,8 +99,8 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $version = '0.0.0'
           if ($env:GITHUB_REF_TYPE -eq 'tag') {
-            if ($env:GITHUB_REF_NAME -cnotmatch '^v([0-9]+[.][0-9]+[.][0-9]+)$') {
-              throw "Expected release tag vMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
+            if ($env:GITHUB_REF_NAME -cnotmatch '^[vt]([0-9]+[.][0-9]+[.][0-9]+)$') {
+              throw "Expected release tag vMAJOR.MINOR.PATCH or tMAJOR.MINOR.PATCH, got $env:GITHUB_REF_NAME"
             }
             $version = $Matches[1]
           }
@@ -181,7 +181,7 @@ jobs:
 
   publish:
     name: Publish Windows x64 releases
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    if: github.event_name == 'push' && github.ref_type == 'tag' && (startsWith(github.ref_name, 'v') || startsWith(github.ref_name, 't'))
     needs: windows-x64
     runs-on: ubuntu-latest
     permissions:
@@ -199,14 +199,18 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 6
-          gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes \
-            --title "Creatora OBS Companion $GITHUB_REF_NAME"
+          case "$GITHUB_REF_NAME" in
+            t*) gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes \
+                  --prerelease --title "Creatora OBS Companion $GITHUB_REF_NAME (Test)" ;;
+            v*) gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes \
+                  --title "Creatora OBS Companion $GITHUB_REF_NAME" ;;
+            *) echo "Unsupported release tag: $GITHUB_REF_NAME" >&2; exit 1 ;;
+          esac
 
 
   # Experimental platform builds. Not included in stable releases until pairing
   # credential storage, OBS loading, and package layout are verified on-device.
-  macos:
-    name: macOS x86_64 / OBS 33 (experimental)
+()=>n.replace("\n    name:", "\n    if: github.ref_type != 'tag' || startsWith(github.ref_name, 'v')\n    name:")
     runs-on: macos-26-intel
     timeout-minutes: 120
     continue-on-error: true
@@ -276,8 +280,7 @@ jobs:
           path: companion/dist/*
           if-no-files-found: error
 
-  linux:
-    name: Linux x86_64 / OBS 33 (experimental)
+()=>n.replace("\n    name:", "\n    if: github.ref_type != 'tag' || startsWith(github.ref_name, 'v')\n    name:")
     runs-on: ubuntu-26.04
     timeout-minutes: 120
     continue-on-error: true
