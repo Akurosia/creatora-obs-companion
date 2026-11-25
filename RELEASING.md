@@ -46,3 +46,10 @@ baseline, but the v0.1.8 OBS 32.1 build does not load in OBS 32.2.2.
 For now, retain and label both packages until both clean portable runtimes
 pass loading and functional tests for a shared binary. Do not remove
 compatibility variants based only on CMake compile success.
+
+## In-app update channels
+
+- Test builds from `tX.Y.Z` tags compile with `CREATORA_RELEASE_CHANNEL=test`. The companion checks the GitHub Releases list and considers both official `tX.Y.Z` prereleases and `vX.Y.Z` stable releases. It selects the highest semantic version and prefers a stable release when both channels have the same version. A test build can therefore upgrade to the stable release of its own version.
+- Stable builds from `vX.Y.Z` tags compile with `CREATORA_RELEASE_CHANNEL=stable`. They continue to query `/releases/latest` and never advertise prereleases.
+- Non-tag/manual builds default to stable update checks. Local builds can opt in using `./scripts/build-obs33.ps1 -ReleaseChannel test` (with the usual OBS SDK arguments).
+- No update is shown when the selected release is older than the running build or is the same test version. Both channels preserve manual installation.
