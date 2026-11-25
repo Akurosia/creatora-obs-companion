@@ -131,13 +131,21 @@ Windows registry using Qt's organization/application settings.
   and Windows DPAPI-encrypted credentials. Independent portable OBS installations
   no longer share a global configuration.
 
-**Upgrading from older Creatora builds:** Existing global settings are **not**
-imported automatically. Re-enter the server URL and pair once in each OBS
-installation. This avoids accidentally sharing device credentials between
-portable installations. Existing Windows registry data is not automatically
-deleted. The DPAPI encryption still binds credentials to the Windows user;
-copying a portable OBS folder to another Windows account or machine requires
-pairing again.
+**Upgrading from older Creatora builds:** If the OBS-specific `settings.ini`
+is missing or empty on startup, the companion imports the existing legacy
+global `Creatora/CreatoraObsCompanion` settings **once** into that OBS
+installation. This includes server URL, auto-connect preference, allowed files,
+and the encrypted pairing credentials. If local settings already exist, they
+are never overwritten by the global settings. Existing global settings are left
+untouched, and the migration logs success without logging any secrets.
+
+**Portable-installation note:** Each new portable OBS installation with no
+local configuration will import the same legacy global settings if they exist.
+This includes the previous device pairing, so unpair/re-pair if you want unique
+device credentials per portable OBS instance. Windows DPAPI encryption is still
+bound to the Windows user: after moving a portable folder to another Windows
+account or machine, existing credentials may not decrypt and re-pairing will
+be necessary.
 
 ## OBS major-version compatibility
 
