@@ -48,12 +48,15 @@
 #include <functional>
 #include <memory>
 
+// OBS_DECLARE_MODULE() lives in plugin.cpp, so resolve the module's path there.
+char *creatoraModuleConfigPath(const char *file);
+
 namespace {
 // Use OBS's own config root: a portable OBS installation keeps this file
 // alongside its own config, independently of other OBS installations.
 std::unique_ptr<QSettings> companionSettings()
 {
-    char *rawPath = obs_module_config_path("settings.ini");
+    char *rawPath = creatoraModuleConfigPath("settings.ini");
     if (!rawPath) {
         blog(LOG_ERROR, "[Creatora] Unable to resolve OBS plugin configuration path");
         return {};
