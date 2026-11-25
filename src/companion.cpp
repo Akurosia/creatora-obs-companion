@@ -64,7 +64,34 @@ std::unique_ptr<QSettings> companionSettings()
         blog(LOG_ERROR, "[Creatora] Unable to create OBS plugin configuration directory");
         return {};
     }
-    return std::make_unique<QSettings>(path, QSettings::IniFormat);
+    auto settings = std::make_unique<QSettings>(path, QSettings::IniFormat);
+    // Only migrate when this OBS instance has no configuration yet. This also
+    // handles an empty settings.ini without overwriting populated settings.
+    // The old QSettings constructor is deliberately used only for migration.
+    if (settings->status() == QSettings::NoError && settings->allKeys().isEmpty()) {
+        QSettings legacy("Creatora", "CreatoraObsCompanion");
+        legacy.setFallbacksEnabled(false);
+        // Copy only keys used by previous releases. Preserve the DPAPI blob
+        // without decrypting it, and keep the original settings untouched.
+        static const char *const keys[] = {
+            "url", "auto_connect", "allowed_files", "encrypted_credentials"
+        };
+        int imported = 0;
+        for (const char *key : keys) {
+            if (!legacy.contains(QLatin1String(key))) continue;
+            settings->setValue(QLatin1String(key), legacy.value(QLatin1String(key)));
+            ++imported;
+        }
+        if (imported > 0) {
+            settings->sync();
+            if (settings->status() == QSettings::NoError) {
+                blog(LOG_INFO, "[Creatora] Imported legacy global settings into OBS-local config");
+            } else {
+                blog(LOG_ERROR, "[Creatora] Failed to persist migrated OBS-local settings");
+            }
+        }
+    }
+    return settings;
 }
 
 constexpr int kMaxReplyBytes = 32768;
