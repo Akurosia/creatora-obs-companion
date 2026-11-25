@@ -1,4 +1,4 @@
-# Package the OBS 33 plugin with exactly two DLLs at plugins/creatora-obs-companion/.
+# Package the OBS 33 plugin with the matching Qt Schannel TLS backend.
 [CmdletBinding()]
 param(
     [string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot),
@@ -14,7 +14,8 @@ if ([string]::IsNullOrWhiteSpace($BuildDir)) { $BuildDir = Join-Path $ProjectRoo
 if (-not [IO.Path]::IsPathRooted($BuildDir)) { $BuildDir = Join-Path $ProjectRoot $BuildDir }
 $pluginDll = Join-Path $BuildDir 'Release\creatora-obs-companion.dll'
 $webSocketsDll = Join-Path $QtRoot 'bin\Qt6WebSockets.dll'
-foreach ($path in @($pluginDll, $webSocketsDll)) {
+$tlsDll = Join-Path $QtRoot 'plugins\tls\qschannelbackend.dll'
+foreach ($path in @($pluginDll, $webSocketsDll, $tlsDll)) {
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "Required compiled DLL not found: $path"
     }
@@ -31,10 +32,12 @@ if (-not $SkipQtVersionCheck) {
     }
     $obsQtVersion = (Get-Item -LiteralPath $obsQtDll).VersionInfo.ProductVersion
     $webSocketsVersion = (Get-Item -LiteralPath $webSocketsDll).VersionInfo.ProductVersion
+    $tlsVersion = (Get-Item -LiteralPath $tlsDll).VersionInfo.ProductVersion
     $obsMatch = [regex]::Match($obsQtVersion, '^\d+\.\d+')
     $webSocketsMatch = [regex]::Match($webSocketsVersion, '^\d+\.\d+')
-    if (-not $obsMatch.Success -or -not $webSocketsMatch.Success -or $obsMatch.Value -ne $webSocketsMatch.Value) {
-        throw "Qt version mismatch: OBS Qt6Core=$obsQtVersion vs Qt6WebSockets=$webSocketsVersion. Build WebSockets against OBS's Qt version; do not copy Qt6Core into OBS."
+    $tlsMatch = [regex]::Match($tlsVersion, '^\d+\.\d+')
+    if (-not $obsMatch.Success -or -not $webSocketsMatch.Success -or -not $tlsMatch.Success -or $obsMatch.Value -ne $webSocketsMatch.Value -or $obsMatch.Value -ne $tlsMatch.Value) {
+        throw "Qt version mismatch: OBS Qt6Core=$obsQtVersion, Qt6WebSockets=$webSocketsVersion, Schannel TLS=$tlsVersion. Do not copy Qt6Core into OBS."
     }
     Write-Host "Compatible Qt major.minor versions: $($obsMatch.Value)"
 } else {
@@ -51,12 +54,15 @@ try {
     New-Item -ItemType Directory -Path $pluginFolder -Force | Out-Null
     Copy-Item -LiteralPath $pluginDll -Destination (Join-Path $pluginFolder 'creatora-obs-companion.dll')
     Copy-Item -LiteralPath $webSocketsDll -Destination (Join-Path $pluginFolder 'Qt6WebSockets.dll')
+    $tlsFolder = Join-Path $pluginFolder 'tls'
+    New-Item -ItemType Directory -Force -Path $tlsFolder | Out-Null
+    Copy-Item -LiteralPath $tlsDll -Destination (Join-Path $tlsFolder 'qschannelbackend.dll')
     $files = @(Get-ChildItem -LiteralPath $stage -Recurse -File)
-    if ($files.Count -ne 2) { throw "Expected two DLLs; got $($files.Count)." }
+    if ($files.Count -ne 3) { throw "Expected three DLLs; got $($files.Count)." }
     if (Test-Path -LiteralPath $OutputZip) { Remove-Item -LiteralPath $OutputZip -Force }
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $OutputZip -CompressionLevel Optimal
     Write-Host "Created: $OutputZip"
-    Write-Host 'Contains only plugins/creatora-obs-companion/creatora-obs-companion.dll and Qt6WebSockets.dll.'
+    Write-Host 'Contains the companion DLL, Qt6WebSockets.dll and tls/qschannelbackend.dll.'
     Write-Host 'Nothing was installed into OBS.'
 } finally {
     if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
