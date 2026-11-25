@@ -925,6 +925,16 @@ void CreatoraCompanion::loadSettings()
     auto settings = companionSettings();
     if (!settings) return;
     baseUrl_ = settings->value("url", baseUrl_).toString();
+    // Older releases saved the test server. Switch only unpaired instances:
+    // a paired device has server-bound credentials and must be unpaired first.
+    const QString previousUrl = baseUrl_.trimmed().remove(QRegularExpression("/+$"));
+    if (previousUrl == QLatin1String("https://aattest.akurosia.de") &&
+        settings->value("encrypted_credentials").toByteArray().isEmpty()) {
+        baseUrl_ = QStringLiteral("https://creatora.org");
+        settings->setValue("url", baseUrl_);
+        settings->sync();
+        blog(LOG_INFO, "[Creatora] Replaced legacy unpaired test URL with production URL");
+    }
     // Security by default: missing setting means auto-connect off.
     autoConnect_->setChecked(settings->value("auto_connect", false).toBool());
     const QJsonDocument files = QJsonDocument::fromJson(settings->value("allowed_files").toByteArray());
