@@ -791,6 +791,42 @@ void CreatoraCompanion::captureScreenshot(const QString &id, qint64 expiry, cons
     }
     if (!isSecureEndpoint()) { fail("Invalid HTTPS server"); return; }
 
+    const auto name = args.value("source_name").toString().toUtf8();
+    auto *source = obs_get_source_by_name(name.constData());
+    if (!source) { fail("Source not found"); return; }
+    const bool needsWarmup = !obs_source_showing(source);
+    // Hold an auxiliary showing reference so OBS can resume the source without changing Program.
+    obs_source_inc_showing(source);
+    const auto showing = std::shared_ptr<obs_source_t>(source, [](obs_source_t *held) {
+        obs_source_dec_showing(held);
+        obs_source_release(held);
+    });
+    if (!needsWarmup) {
+        takeScreenshot(id, expiry, args);
+        return;
+    }
+
+    constexpr int sourceWarmupMs = 1500;
+    if (expiry - now <= sourceWarmupMs) { fail("Command expired before source could warm up"); return; }
+    QTimer::singleShot(sourceWarmupMs, this, [this, id, expiry, args, showing, endpoint = baseUrl_] {
+        if (endpoint != baseUrl_) { sendResult(id, false, "Companion server changed"); return; }
+        if (obs_source_removed(showing.get())) { sendResult(id, false, "Source not found"); return; }
+        takeScreenshot(id, expiry, args);
+    });
+}
+
+void CreatoraCompanion::takeScreenshot(const QString &id, qint64 expiry, const QJsonObject &args)
+{
+    auto fail = [this, id](const QString &reason) {
+        blog(LOG_WARNING, "[Creatora] Polaroid: %s", reason.toUtf8().constData());
+        sendResult(id, false, reason.left(100));
+    };
+    if (expiry <= QDateTime::currentMSecsSinceEpoch()) { fail("Command expired"); return; }
+    if (socket_.state() != QAbstractSocket::ConnectedState || !desiredConnected_) {
+        fail("Companion disconnected"); return;
+    }
+    if (!isSecureEndpoint()) { fail("Invalid HTTPS server"); return; }
+
     // Data URLs never appear in diagnostics or retained settings.
     QString error;
     QJsonObject captured = obsScreenshot(args, error);

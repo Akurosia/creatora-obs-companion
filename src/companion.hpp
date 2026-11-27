@@ -48,6 +48,7 @@ private:
     void refreshCredentials(bool andConnect);
     void processCommand(const QJsonObject &command);
     void captureScreenshot(const QString &id, qint64 expiry, const QJsonObject &args);
+    void takeScreenshot(const QString &id, qint64 expiry, const QJsonObject &args);
     void sendResult(const QString &id, bool ok, const QString &reason);
     void request(const QString &path, const QJsonObject &body,
                  const std::function<void(int, QJsonObject)> &done,
